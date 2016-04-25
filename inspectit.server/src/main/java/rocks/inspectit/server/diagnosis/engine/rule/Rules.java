@@ -22,12 +22,14 @@ import com.google.common.collect.Sets;
 import rocks.inspectit.server.diagnosis.engine.rule.api.Action;
 import rocks.inspectit.server.diagnosis.engine.rule.api.Condition;
 import rocks.inspectit.server.diagnosis.engine.rule.api.Rule;
-import rocks.inspectit.server.diagnosis.engine.rule.api.Value;
+import rocks.inspectit.server.diagnosis.engine.rule.api.SessionVariable;
+import rocks.inspectit.server.diagnosis.engine.rule.api.TagValue;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.ActionMethod;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.ConditionMethod;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.FireCondition;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.RuleDefinition;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.RuleDefinitionException;
+import rocks.inspectit.server.diagnosis.engine.rule.definition.SessionVariableInjection;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.TagInjection;
 import rocks.inspectit.server.diagnosis.engine.rule.execution.ConditionFailure;
 import rocks.inspectit.server.diagnosis.engine.rule.execution.RuleOutput;
@@ -87,29 +89,45 @@ public final class Rules {
 
 		ActionMethod actionMethod = describeActionMethod(clazz);
 		List<ConditionMethod> conditionMethods = describeConditionMethods(clazz);
-		List<TagInjection> injections = describeInjectionPoints(clazz);
+		List<TagInjection> tagInjections = describeTagInjection(clazz);
+		List<SessionVariableInjection> parameterInjections = describeSessionParameterInjections(clazz);
 
 		// Ensure a fire condition if it was not provided by Rule annotation.
 		// FireCondition can be extracted from the required injections
 		if (fireCondition == null) {
 			Set<String> requiredTypes = new HashSet<>();
-			for (TagInjection injection : injections) {
+			for (TagInjection injection : tagInjections) {
 				requiredTypes.add(injection.getTagType());
 			}
 			fireCondition = new FireCondition(requiredTypes);
 		}
 
-		return new RuleDefinition(name, description, clazz, fireCondition, conditionMethods, actionMethod, injections);
+		return new RuleDefinition(name, description, clazz, fireCondition, conditionMethods, actionMethod, tagInjections, parameterInjections);
 	}
 
 	// -------------------------------------------------------------
 	// Methods: Descriptions
 	// -------------------------------------------------------------
 
-	public static List<TagInjection> describeInjectionPoints(Class<?> clazz) {
-		List<TagInjection> tagInjections = visitFieldsAnnotatedWith(Value.class, clazz, new Visitor<Value, Field, TagInjection>() {
+	/**
+	 * @param clazz
+	 * @return
+	 */
+	public static List<SessionVariableInjection> describeSessionParameterInjections(Class<?> clazz) {
+		return visitFieldsAnnotatedWith(SessionVariable.class, clazz, new Visitor<SessionVariable, Field, SessionVariableInjection>() {
+
 			@Override
-			public TagInjection visit(Value annotation, Field field) {
+			public SessionVariableInjection visit(SessionVariable annotation, Field field) {
+				return new SessionVariableInjection(annotation.name(), annotation.optional(), field);
+			}
+
+		});
+	}
+
+	public static List<TagInjection> describeTagInjection(Class<?> clazz) {
+		List<TagInjection> tagInjections = visitFieldsAnnotatedWith(TagValue.class, clazz, new Visitor<TagValue, Field, TagInjection>() {
+			@Override
+			public TagInjection visit(TagValue annotation, Field field) {
 				return new TagInjection(annotation.tagType(), field, annotation.injectionType());
 			}
 		});

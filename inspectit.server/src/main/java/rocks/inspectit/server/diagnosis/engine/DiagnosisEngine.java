@@ -17,6 +17,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import rocks.inspectit.server.diagnosis.engine.session.Session;
 import rocks.inspectit.server.diagnosis.engine.session.SessionPool;
 import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultHandler;
+import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
 
 /**
  * @param <I>
@@ -48,10 +49,15 @@ public class DiagnosisEngine<I, R> implements IDiagnosisEngine<I, R> {
 	 */
 	@Override
 	public void analyze(I input) throws Exception {
+		analyze(input, new SessionVariables());
+	}
+
+	@Override
+	public void analyze(I input, SessionVariables variables) {
 		synchronized (this) {
 			final Session<I, R> session;
 			try {
-				session = sessionPool.borrowObject(input);
+				session = sessionPool.borrowObject(input, variables);
 			} catch (Exception e) {
 				throw new DiangosisEngineException("Failed to borrow Object from SessionPool.", e);
 			}
@@ -80,7 +86,7 @@ public class DiagnosisEngine<I, R> implements IDiagnosisEngine<I, R> {
 				}
 			});
 		}
-	}
+	};
 
 	/**
 	 * {@inheritDoc}

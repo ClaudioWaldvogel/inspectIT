@@ -3,6 +3,7 @@ package rocks.inspectit.server.diagnosis.engine.session;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import rocks.inspectit.server.diagnosis.engine.DiagnosisEngineConfiguration;
+import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
 
 /**
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
@@ -32,11 +33,11 @@ public class SessionPool<I, R> extends GenericObjectPool<Session<I, R>> {
 	 * @param input
 	 * @return
 	 */
-	public Session<I, R> borrowObject(I input) {
+	public Session<I, R> borrowObject(I input, SessionVariables variables) {
 		Session<I, R> session;
 		try {
 			session = super.borrowObject();
-			session.activate(input);
+			session.activate(input, variables);
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to borrow object from SessionPool.", e);
 		}

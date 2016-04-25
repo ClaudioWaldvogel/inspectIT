@@ -28,6 +28,7 @@ import rocks.inspectit.server.diagnosis.engine.rule.execution.store.IRuleOutputS
 import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultCollector;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
+import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
 
 /**
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
@@ -127,11 +128,15 @@ public class Session<I, R> implements Callable<R> {
 	// -------------------------------------------------------------
 
 	public Session<I, R> activate(I input) {
+		return activate(input, new SessionVariables());
+	}
+
+	public Session<I, R> activate(I input, SessionVariables variables) {
 		switch (state) {
 		case NEW:
 		case PASSIVATED:
 			// All we need to do is to reactivate the SessionContext
-			sessionContext.activate(input);
+			sessionContext.activate(input, variables);
 			state = State.ACTIVATED;
 			break;
 		case DESTROYED:
@@ -283,7 +288,7 @@ public class Session<I, R> implements Callable<R> {
 
 		@Override
 		public Collection<RuleOutput> call() throws Exception {
-			return definition.execute(collectInputs(definition));
+			return definition.execute(collectInputs(definition), Session.this.sessionContext.getSessionVariables());
 		}
 	}
 
