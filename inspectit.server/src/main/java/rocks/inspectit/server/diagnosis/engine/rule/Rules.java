@@ -19,11 +19,7 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 
-import rocks.inspectit.server.diagnosis.engine.rule.api.Action;
-import rocks.inspectit.server.diagnosis.engine.rule.api.Condition;
-import rocks.inspectit.server.diagnosis.engine.rule.api.Rule;
-import rocks.inspectit.server.diagnosis.engine.rule.api.SessionVariable;
-import rocks.inspectit.server.diagnosis.engine.rule.api.TagValue;
+import rocks.inspectit.server.diagnosis.engine.rule.api.*;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.ActionMethod;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.ConditionMethod;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.FireCondition;
@@ -42,8 +38,6 @@ import rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.Visitor;
 public final class Rules {
 
 	public static final String TRIGGER_RULE = "TRIGGER_RULE";
-
-	public static final String EMPTY_RULE_DESCRIPTION = "Unknown";
 
 	/**
 	 * Private constructor.
@@ -75,39 +69,38 @@ public final class Rules {
 			throw new RuleDefinitionException(clazz.getName() + " must define an empty default constructor.");
 		}
 
-		Rule rule = findAnnotation(Rule.class, clazz);
-		String name = clazz.getName();
-		String description = EMPTY_RULE_DESCRIPTION;
-		FireCondition fireCondition = null;
-		if (rule != null) {
-			name = rule.name();
-			description = rule.description();
-			if (rule.fireCondition().length > 0) {
-				fireCondition = new FireCondition(Sets.newHashSet(Arrays.asList(rule.fireCondition())));
-			}
-		}
-
 		ActionMethod actionMethod = describeActionMethod(clazz);
 		List<ConditionMethod> conditionMethods = describeConditionMethods(clazz);
 		List<TagInjection> tagInjections = describeTagInjection(clazz);
-		List<SessionVariableInjection> parameterInjections = describeSessionParameterInjections(clazz);
+		List<SessionVariableInjection> variableInjections = describeSessionParameterInjections(clazz);
 
-		// Ensure a fire condition if it was not provided by Rule annotation.
-		// FireCondition can be extracted from the required injections
-		if (fireCondition == null) {
-			Set<String> requiredTypes = new HashSet<>();
-			for (TagInjection injection : tagInjections) {
-				requiredTypes.add(injection.getTagType());
-			}
-			fireCondition = new FireCondition(requiredTypes);
-		}
+		Rule rule = findAnnotation(Rule.class, clazz);
+		String name = rule != null ? rule.name() : clazz.getName();
+		String description = rule != null ? rule.description() : RuleDefinition.NON_DESCRIPTION;
+		FireCondition fireCondition = describeFireCondition(rule, tagInjections);
 
-		return new RuleDefinition(name, description, clazz, fireCondition, conditionMethods, actionMethod, tagInjections, parameterInjections);
+		return new RuleDefinition(name, description, clazz, fireCondition, conditionMethods, actionMethod, tagInjections, variableInjections);
 	}
 
 	// -------------------------------------------------------------
 	// Methods: Descriptions
 	// -------------------------------------------------------------
+
+	/**
+	 * @param rule
+	 * @return
+	 */
+	public static FireCondition describeFireCondition(Rule rule, List<TagInjection> tagInjections) {
+		if (rule != null && rule.fireCondition().length > 0) {
+			return new FireCondition(Sets.newHashSet(Arrays.asList(rule.fireCondition())));
+		} else {
+			Set<String> requiredTypes = new HashSet<>();
+			for (TagInjection injection : tagInjections) {
+				requiredTypes.add(injection.getTagType());
+			}
+			return new FireCondition(requiredTypes);
+		}
+	}
 
 	/**
 	 * @param clazz
@@ -180,6 +173,14 @@ public final class Rules {
 				String msg = method.getDeclaringClass().getName() + " defines an invalid action method with name: " + method.getName();
 				msg += "\nValid action methods are public with a non void return type and zero arguments (e.g. public" + " String action())";
 				throw new RuleDefinitionException(msg);
+			}
+			//ensure proper return type in case of MULTIPLE outputQuantity
+			if (action.getOutputQuantity().equals(Quantity.MULTIPLE)) {
+				Class<?> returnType = action.getMethod().getReturnType();
+				if (!returnType.isArray() && !Iterable.class.isAssignableFrom(returnType)) {
+					String msg = method.getDeclaringClass().getName() + "defines an MULTIPLE outputQuantity, but return type is neither Array nor Collection.";
+					throw new RuleDefinitionException(msg);
+				}
 			}
 			return action;
 		} else {

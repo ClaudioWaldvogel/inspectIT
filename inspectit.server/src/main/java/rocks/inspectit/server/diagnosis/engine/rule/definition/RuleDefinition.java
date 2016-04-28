@@ -1,17 +1,6 @@
 package rocks.inspectit.server.diagnosis.engine.rule.definition;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.tryInstantiate;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import com.google.common.collect.Sets;
-
 import rocks.inspectit.server.diagnosis.engine.rule.execution.ConditionFailure;
 import rocks.inspectit.server.diagnosis.engine.rule.execution.ExecutionContext;
 import rocks.inspectit.server.diagnosis.engine.rule.execution.RuleInput;
@@ -19,29 +8,50 @@ import rocks.inspectit.server.diagnosis.engine.rule.execution.RuleOutput;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
 
+import java.util.*;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.tryInstantiate;
+
 /**
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 public class RuleDefinition {
 
-	private final String name;
-	private final String description;
-	private final Class<?> implementation;
-	private final FireCondition fireCondition;
-	private final List<TagInjection> tagInjectinos;
-	private final ActionMethod actionMethod;
-	private final List<ConditionMethod> conditionMethods;
-	private final List<SessionVariableInjection> variableInjections;
+	public static final String NON_DESCRIPTION = "Not available";
 
-	public RuleDefinition(String name, String description, Class<?> implementation, FireCondition fireCondition, List<ConditionMethod> conditionMethods, ActionMethod actionMethod, List<TagInjection> tagInjectinos, List<SessionVariableInjection> variableInjections) {
+	String name;
+	String description;
+	Class<?> implementation;
+	FireCondition fireCondition;
+	List<TagInjection> tagInjections;
+	ActionMethod actionMethod;
+	List<ConditionMethod> conditionMethods;
+	List<SessionVariableInjection> variableInjections;
+
+	/**
+	 *
+	 * @param name
+	 * @param description
+	 * @param implementation
+	 * @param fireCondition
+	 * @param conditionMethods
+	 * @param actionMethod
+	 * @param tagInjections
+	 * @param variableInjections
+	 */
+	public RuleDefinition(String name, String description, Class<?> implementation, FireCondition fireCondition, List<ConditionMethod> conditionMethods, ActionMethod actionMethod,
+			List<TagInjection> tagInjections, List<SessionVariableInjection> variableInjections) {
 		this.name = name;
 		this.description = description;
 		this.implementation = implementation;
 		this.fireCondition = fireCondition;
-		this.tagInjectinos = tagInjectinos;
+		this.tagInjections = tagInjections;
 		this.actionMethod = actionMethod;
 		this.conditionMethods = conditionMethods;
 		this.variableInjections = variableInjections;
+
 	}
 
 	// -------------------------------------------------------------
@@ -88,7 +98,7 @@ public class RuleDefinition {
 		}
 
 		// Finally execute the rule's actual action if not conditions failed
-		Set<Tag> tags = Sets.newHashSet();
+		Collection<Tag> tags = Sets.newHashSet();
 		if (conditionFailures.size() == 0) {
 			tags = getActionMethod().execute(ctx);
 		}
@@ -137,12 +147,12 @@ public class RuleDefinition {
 	}
 
 	/**
-	 * Gets {@link #tagInjectinos}.
+	 * Gets {@link #tagInjections}.
 	 *
-	 * @return {@link #tagInjectinos}
+	 * @return {@link #tagInjections}
 	 */
 	public List<TagInjection> getTagInjections() {
-		return tagInjectinos;
+		return tagInjections;
 	}
 
 	/**
@@ -179,7 +189,7 @@ public class RuleDefinition {
 	@Override
 	public String toString() {
 		return "RuleDefinition{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", implementation=" + implementation + ", fireCondition=" + fireCondition + ", injectionPoints="
-				+ tagInjectinos + ", actionMethod=" + actionMethod + ", conditionMethods=" + conditionMethods + '}';
+				+ tagInjections + ", actionMethod=" + actionMethod + ", conditionMethods=" + conditionMethods + '}';
 	}
 
 	@Override

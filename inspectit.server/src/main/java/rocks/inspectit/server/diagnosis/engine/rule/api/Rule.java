@@ -6,16 +6,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface Rule {
 
-    String name() default "";
+	String name() default "";
 
-    String description() default "";
+	String description() default "";
 
-    //TODO should we support this?
-    String[] fireCondition() default {};
+	// TODO should we support this?
+	String[] fireCondition() default {};
 }

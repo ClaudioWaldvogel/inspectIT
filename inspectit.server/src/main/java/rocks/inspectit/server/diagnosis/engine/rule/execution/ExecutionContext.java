@@ -8,61 +8,61 @@ import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
  */
 public class ExecutionContext {
 
-	private final Object instance;
-	private final RuleInput input;
-	private final RuleDefinition definition;
-	private final SessionVariables sessionParameters;
+    private Object instance;
+    private RuleInput input;
+    private RuleDefinition definition;
+    private SessionVariables sessionParameters;
 
-	public ExecutionContext(RuleDefinition definition, Object instance, RuleInput input) {
-		this(definition, instance, input, new SessionVariables());
-	}
+    public ExecutionContext(RuleDefinition definition, Object instance, RuleInput input) {
+        this(definition, instance, input, new SessionVariables());
+    }
 
-	public ExecutionContext(RuleDefinition definition, Object instance, RuleInput input, SessionVariables sessionParameters) {
-		this.definition = definition;
-		this.instance = instance;
-		this.input = input;
-		this.sessionParameters = sessionParameters;
+    public ExecutionContext(RuleDefinition definition, Object instance, RuleInput input, SessionVariables sessionParameters) {
+        this.definition = definition;
+        this.instance = instance;
+        this.input = input;
+        this.sessionParameters = sessionParameters;
 
-	}
+    }
 
-	// -------------------------------------------------------------
-	// Methods: Accessors
-	// -------------------------------------------------------------
+    // -------------------------------------------------------------
+    // Methods: Accessors
+    // -------------------------------------------------------------
 
-	/**
-	 * Gets {@link #instance}.
-	 *
-	 * @return {@link #instance}
-	 */
-	public Object getInstance() {
-		return instance;
-	}
+    /**
+     * Gets {@link #instance}.
+     *
+     * @return {@link #instance}
+     */
+    public Object getInstance() {
+        return instance;
+    }
 
-	/**
-	 * Gets {@link #input}.
-	 *
-	 * @return {@link #input}
-	 */
-	public RuleInput getRuleInput() {
-		return input;
-	}
+    /**
+     * Gets {@link #input}.
+     *
+     * @return {@link #input}
+     */
+    public RuleInput getRuleInput() {
+        return input;
+    }
 
-	/**
-	 * Gets {@link #definition}.
-	 *
-	 * @return {@link #definition}
-	 */
-	public RuleDefinition getDefinition() {
-		return definition;
-	}
+    /**
+     * Gets {@link #definition}.
+     *
+     * @return {@link #definition}
+     */
+    public RuleDefinition getDefinition() {
+        return definition;
+    }
 
-	/**
-	 * Gets {@link #sessionParameters}.
-	 *
-	 * @return {@link #sessionParameters}
-	 */
-	public SessionVariables getSessionParameters() {
-		return sessionParameters;
-	}
+    /**
+     * Gets {@link #sessionParameters}.
+     *
+     * @return {@link #sessionParameters}
+     */
+    public SessionVariables getSessionParameters() {
+        return sessionParameters;
+    }
 
 }

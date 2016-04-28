@@ -36,4 +36,49 @@ public abstract class FieldInjection {
 	public Field getTarget() {
 		return target;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String toString() {
+		return "FieldInjection [target=" + target + "]";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((target == null) ? 0 : target.hashCode());
+		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		FieldInjection other = (FieldInjection) obj;
+		if (target == null) {
+			if (other.target != null) {
+				return false;
+			}
+		} else if (!target.equals(other.target)) {
+			return false;
+		}
+		return true;
+	}
+
 }

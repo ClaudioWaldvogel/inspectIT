@@ -3,6 +3,7 @@
  */
 package rocks.inspectit.server.diagnosis.engine.util;
 
+
 import java.util.HashMap;
 
 /**
@@ -11,16 +12,12 @@ import java.util.HashMap;
  */
 public class SessionVariables extends HashMap<String, Object> {
 
-	/**
-	 *
-	 */
 	private static final long serialVersionUID = -7066749243978371201L;
 
 	/**
 	 *
 	 */
 	public SessionVariables() {
-
 	}
 
 }

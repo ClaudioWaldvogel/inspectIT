@@ -32,14 +32,14 @@ public class DiagnosisServiceImpl implements IDiagnosisService {
 
 	private List<DefaultSessionResult<InvocationSequenceData>> results;
 
-	private IDiagnosisEngine<InvocationSequenceData, DefaultSessionResult<InvocationSequenceData>> engine;
+	private IDiagnosisEngine<InvocationSequenceData> engine;
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public void onApplicationEvent(DiagnosisEvent diagnosisEvent) {
-		if (diagnosisEvent instanceof DiagnosisEvent) {
+		if (diagnosisEvent != null) {
 			try {
 				engine.analyze((InvocationSequenceData) diagnosisEvent.getSource());
 			} catch (Exception e) {

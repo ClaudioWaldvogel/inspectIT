@@ -1,16 +1,14 @@
 package rocks.inspectit.server.diagnosis.engine.tag;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.google.common.base.Objects;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
 
 /**
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
  */
 public class Tag {
 
-	private static final AtomicInteger IDS = new AtomicInteger();
-	private final int id;
 	private final String type;
 	private final Object value;
 	private final Tag parent;
@@ -26,22 +24,12 @@ public class Tag {
 	}
 
 	public Tag(String type, Object value, Tag parent) {
-		this.id = IDS.incrementAndGet();
 		this.value = value;
 		this.type = type;
 		this.parent = parent;
 		if (this.parent != null) {
 			this.parent.markParent();
 		}
-	}
-
-	/**
-	 * Gets {@link #id}.
-	 *
-	 * @return {@link #id}
-	 */
-	public int getId() {
-		return id;
 	}
 
 	/**
@@ -88,24 +76,24 @@ public class Tag {
 
 	@Override
 	public String toString() {
-		return "Tag{" + "id=" + id + ", type='" + type + '\'' + ", value=" + value + ", parent=" + parent + ", state=" + state + '}';
+		return new ToStringBuilder(this).append("type", type).append("value", value).append("parent", parent).append("state", state).toString();
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) {
+		if (this == o)
 			return true;
-		}
-		if (o == null || getClass() != o.getClass()) {
+
+		if (o == null || getClass() != o.getClass())
 			return false;
-		}
+
 		Tag tag = (Tag) o;
-		return getId() == tag.getId() && Objects.equal(getType(), tag.getType()) && Objects.equal(getValue(), tag.getValue()) && Objects.equal(getParent(), tag.getParent());
+
+		return new EqualsBuilder().append(getType(), tag.getType()).append(getValue(), tag.getValue()).append(getParent(), tag.getParent()).append(getState(), tag.getState()).isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(getId(), getType(), getValue(), getParent());
+		return new HashCodeBuilder(17, 37).append(getType()).append(getValue()).append(getParent()).append(getState()).toHashCode();
 	}
-
 }

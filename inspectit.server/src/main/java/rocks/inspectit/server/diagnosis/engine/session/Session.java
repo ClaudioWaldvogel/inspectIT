@@ -1,25 +1,8 @@
 package rocks.inspectit.server.diagnosis.engine.session;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.tryInstantiate;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Sets;
-
 import rocks.inspectit.server.diagnosis.engine.rule.Rules;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.RuleDefinition;
 import rocks.inspectit.server.diagnosis.engine.rule.execution.RuleInput;
@@ -29,6 +12,12 @@ import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultColl
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
+
+import java.util.*;
+import java.util.concurrent.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.tryInstantiate;
 
 /**
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
@@ -47,7 +36,7 @@ public class Session<I, R> implements Callable<R> {
 	// -------------------------------------------------------------
 
 	/**
-	 * Private Constructor, Session is always instantiated from the Builder
+	 * Private Constructor, Session is always instantiated from the Builder.
 	 */
 	private Session() {
 	}
@@ -142,7 +131,7 @@ public class Session<I, R> implements Callable<R> {
 		case DESTROYED:
 			throw new IllegalStateException("Session already destroyed.");
 		default:
-			throw new IllegalStateException("Session can not enter ACTIVATED stated from: " + state + "state. Ensure Session is in NEW or PASSIVATED state when activating.");
+			throw new IllegalStateException("Session can not enter ACTIVATED stated from: " + state + " state. Ensure Session is in NEW or PASSIVATED state when activating.");
 		}
 		return this;
 	}
@@ -182,8 +171,7 @@ public class Session<I, R> implements Callable<R> {
 		switch (state) {
 		case PROCESSED:
 			// We can destroy the session but it was not yet passivated. To stay in sync with the
-			// state lifeCycle
-			// we passivate first
+			// state lifeCycle we passivate first
 			passivate();
 			destroy();
 			break;
@@ -226,7 +214,10 @@ public class Session<I, R> implements Callable<R> {
 						// insert latest results in storage.
 						// The insertion waits till the future returns
 						sessionContext.getStorage().insert(future.get());
-					} catch (ExecutionException ex) {
+					} catch (Exception ex) {
+						sessionContext.passivate();
+						state = State.PASSIVATED;
+						// TODO Clean and ensure a proper Session state for further processing
 						throw new SessionException("Failed to retrieve RuleOutput", ex);
 					}
 				}
@@ -259,7 +250,7 @@ public class Session<I, R> implements Callable<R> {
 		// A single can produce n inputs. Each embedded tag in ruleOutput.getTags() will be
 		// reflected in a new RuleInput
 		// Although this is an O(n²) loop the iterated lists are expected to be rather short.
-		// Also the nested while loop is expected to be very short. (Probably in )
+		// Also the nested while loop is expected to be very short.
 		for (RuleOutput output : leafOutputs) {
 			for (Tag leafTag : output.getTags()) {
 				Collection<Tag> tags = Tags.unwrap(leafTag, requiredInputTags);
@@ -317,7 +308,7 @@ public class Session<I, R> implements Callable<R> {
 		PASSIVATED,
 
 		/**
-		 * <code>Session</code> is destroyed and not longer usable
+		 * <code>Session</code> is destroyed and not longer usable.
 		 */
 		DESTROYED
 	}

@@ -3,9 +3,9 @@ package rocks.inspectit.server.diagnosis.engine;
 import rocks.inspectit.server.diagnosis.engine.rule.Rules;
 import rocks.inspectit.server.diagnosis.engine.rule.definition.RuleDefinition;
 import rocks.inspectit.server.diagnosis.engine.rule.execution.store.DefaultRuleOutputStorage;
-import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultHandler;
 import rocks.inspectit.server.diagnosis.engine.rule.execution.store.IRuleOutputStorage;
 import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultCollector;
+import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultHandler;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -74,8 +74,7 @@ public class DiagnosisEngineConfiguration<I, R> {
         return this;
     }
 
-    public DiagnosisEngineConfiguration<I, R> setResultCollector(ISessionResultCollector<I, R>
-                                                                                 resultCollector) {
+    public DiagnosisEngineConfiguration<I, R> setResultCollector(ISessionResultCollector<I, R> resultCollector) {
         this.resultCollector = resultCollector;
         return this;
     }

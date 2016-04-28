@@ -3,15 +3,15 @@ package rocks.inspectit.server.diagnosis.engine;
 /**
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
  */
-public class DiangosisEngineException extends RuntimeException {
+public class DiagnosisEngineException extends RuntimeException {
 
 	private static final long serialVersionUID = 8461985903909289169L;
 
-	public DiangosisEngineException(String message) {
+	public DiagnosisEngineException(String message) {
 		super(message);
 	}
 
-	public DiangosisEngineException(String message, Throwable cause) {
+	public DiagnosisEngineException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

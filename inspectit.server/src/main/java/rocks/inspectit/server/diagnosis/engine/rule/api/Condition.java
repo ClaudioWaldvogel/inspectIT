@@ -12,8 +12,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Condition {
 
-    String name();
+	String name() default "";
 
-    String hint() default "";
+	String hint() default "";
 
 }
