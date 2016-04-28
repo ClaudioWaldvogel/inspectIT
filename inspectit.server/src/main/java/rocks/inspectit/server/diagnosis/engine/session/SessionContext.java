@@ -5,9 +5,8 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import rocks.inspectit.server.diagnosis.engine.rule.definition.RuleDefinition;
-import rocks.inspectit.server.diagnosis.engine.rule.execution.store.IRuleOutputStorage;
-import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
+import rocks.inspectit.server.diagnosis.engine.rule.RuleDefinition;
+import rocks.inspectit.server.diagnosis.engine.rule.store.IRuleOutputStorage;
 
 /**
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)

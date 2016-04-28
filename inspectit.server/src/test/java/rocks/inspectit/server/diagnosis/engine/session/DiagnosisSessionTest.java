@@ -4,11 +4,9 @@
 package rocks.inspectit.server.diagnosis.engine.session;
 
 import org.testng.annotations.Test;
-import rocks.inspectit.server.diagnosis.engine.rule.Rules;
-import rocks.inspectit.server.diagnosis.engine.rule.api.*;
-import rocks.inspectit.server.diagnosis.engine.rule.execution.store.DefaultRuleOutputStorage;
-import rocks.inspectit.server.diagnosis.engine.session.result.DefaultSessionResult;
-import rocks.inspectit.server.diagnosis.engine.session.result.DefaultSessionResultCollector;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.*;
+import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
+import rocks.inspectit.server.diagnosis.engine.rule.store.DefaultRuleOutputStorage;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 
@@ -50,7 +48,7 @@ public class DiagnosisSessionTest {
 
 	public static class R1 {
 
-		@TagValue(tagType = Tags.ROOT_TAG, injectionType = InjectionType.BY_VALUE)
+		@TagValue(type = Tags.ROOT_TAG, injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
 		private String input;
 
 		@Action(resultTag = "Tag1")
@@ -62,13 +60,12 @@ public class DiagnosisSessionTest {
 
 	public static class R2 {
 
-		@TagValue(tagType = "Tag1", injectionType = InjectionType.BY_VALUE)
+		@TagValue(type = "Tag1", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
 		private String input;
 
-		@Action(resultTag = "Tag2", resultQuantity = Quantity.MULTIPLE)
+		@Action(resultTag = "Tag2", resultQuantity = Action.Quantity.MULTIPLE)
 		public String[] action() {
-			throw new NullPointerException();
-			//return new String[] { input + "AgainEnhanced", input + "AgainEnhanced2" };
+			return new String[] { input + "AgainEnhanced", input + "AgainEnhanced2" };
 		}
 
 	}
@@ -76,7 +73,7 @@ public class DiagnosisSessionTest {
 	@Rule(name = "FailingRule")
 	public static class R3 {
 
-		@TagValue(tagType = "Tag2", injectionType = InjectionType.BY_VALUE)
+		@TagValue(type = "Tag2", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
 		private String input;
 
 		@Condition(name = "shouldFail", hint = "Also no problem")

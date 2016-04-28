@@ -3,18 +3,22 @@
  */
 package rocks.inspectit.server.diagnosis.engine;
 
-import com.google.common.collect.Sets;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import rocks.inspectit.server.diagnosis.engine.rule.api.*;
-import rocks.inspectit.server.diagnosis.engine.rule.execution.store.DefaultRuleOutputStorage;
-import rocks.inspectit.server.diagnosis.engine.session.result.DefaultSessionResult;
-import rocks.inspectit.server.diagnosis.engine.session.result.DefaultSessionResultCollector;
-import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultHandler;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.Action;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.Condition;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.Rule;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue;
+import rocks.inspectit.server.diagnosis.engine.rule.store.DefaultRuleOutputStorage;
+import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResult;
+import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResultCollector;
+import rocks.inspectit.server.diagnosis.engine.session.ISessionResultHandler;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * @author Claudio Waldvogel
@@ -28,7 +32,7 @@ public class DiagnosisEngineTest {
 
         DiagnosisEngineConfiguration<String, DefaultSessionResult<String>> configuration = new DiagnosisEngineConfiguration<String, DefaultSessionResult<String>>().setNumSessionWorkers(1)
                 .setNumRuleWorkers(1)
-                .setRuleClasses(Sets.newHashSet(R1.class, R2.class, R3.class)).setStorageClass(DefaultRuleOutputStorage.class).setResultCollector(new DefaultSessionResultCollector<String>())
+                .setRuleClasses(newHashSet(R1.class, R2.class, R3.class)).setStorageClass(DefaultRuleOutputStorage.class).setResultCollector(new DefaultSessionResultCollector<String>())
                 .setResultHandler(new ISessionResultHandler<DefaultSessionResult<String>>() {
                     @Override
                     public void handle(DefaultSessionResult<String> result) {
@@ -50,7 +54,7 @@ public class DiagnosisEngineTest {
 
     public static class R1 {
 
-        @TagValue(tagType = Tags.ROOT_TAG, injectionType = InjectionType.BY_VALUE)
+        @TagValue(type = Tags.ROOT_TAG, injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
         private String input;
 
         @Action(resultTag = "Tag1")
@@ -65,10 +69,10 @@ public class DiagnosisEngineTest {
 
     public static class R2 {
 
-        @TagValue(tagType = "Tag1", injectionType = InjectionType.BY_VALUE)
+        @TagValue(type = "Tag1", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
         private String input;
 
-        @Action(resultTag = "Tag2", resultQuantity = Quantity.MULTIPLE)
+        @Action(resultTag = "Tag2", resultQuantity = Action.Quantity.MULTIPLE)
         public String[] action() {
             return new String[] { input + "AgainEnhanced", input + "AgainEnhanced2" };
         }
@@ -78,7 +82,7 @@ public class DiagnosisEngineTest {
     @Rule(name = "FailingRule")
     public static class R3 {
 
-        @TagValue(tagType = "Tag2", injectionType = InjectionType.BY_VALUE)
+        @TagValue(type = "Tag2", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
         private String input;
 
         @Condition(name = "shouldFail", hint = "Also no problem")

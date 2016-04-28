@@ -3,26 +3,24 @@
  */
 package rocks.inspectit.server.diagnosis.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
 import rocks.inspectit.server.diagnosis.engine.DiagnosisEngine;
 import rocks.inspectit.server.diagnosis.engine.DiagnosisEngineConfiguration;
 import rocks.inspectit.server.diagnosis.engine.IDiagnosisEngine;
-import rocks.inspectit.server.diagnosis.engine.rule.api.Action;
-import rocks.inspectit.server.diagnosis.engine.rule.api.InjectionType;
-import rocks.inspectit.server.diagnosis.engine.rule.api.Rule;
-import rocks.inspectit.server.diagnosis.engine.rule.api.TagValue;
-import rocks.inspectit.server.diagnosis.engine.rule.execution.store.DefaultRuleOutputStorage;
-import rocks.inspectit.server.diagnosis.engine.session.result.DefaultSessionResult;
-import rocks.inspectit.server.diagnosis.engine.session.result.DefaultSessionResultCollector;
-import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultHandler;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.Action;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.Rule;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue;
+import rocks.inspectit.server.diagnosis.engine.rule.store.DefaultRuleOutputStorage;
+import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResult;
+import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResultCollector;
+import rocks.inspectit.server.diagnosis.engine.session.ISessionResultHandler;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
 import rocks.inspectit.shared.all.communication.data.TimerData;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Claudio Waldvogel
@@ -76,7 +74,7 @@ public class DiagnosisServiceImpl implements IDiagnosisService {
 	@Rule(name = "ExtractLoggingData")
 	public static class ExtractLoggingData {
 
-		@TagValue(tagType = Tags.ROOT_TAG)
+		@TagValue(type = Tags.ROOT_TAG)
 		private InvocationSequenceData is;
 
 		@Action(resultTag = "LogginData")
@@ -89,7 +87,7 @@ public class DiagnosisServiceImpl implements IDiagnosisService {
 	@Rule(name = "InspectLogginData")
 	public static class InspectLogginData {
 
-		@TagValue(tagType = "LogginData", injectionType = InjectionType.BY_TAG)
+		@TagValue(type = "LogginData", injectionStrategy = TagValue.InjectionStrategy.BY_TAG)
 		private Tag timeTag;
 
 		@Action(resultTag = "InspectedLogginData")

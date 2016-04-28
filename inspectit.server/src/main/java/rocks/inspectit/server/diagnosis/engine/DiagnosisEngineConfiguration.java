@@ -1,11 +1,11 @@
 package rocks.inspectit.server.diagnosis.engine;
 
-import rocks.inspectit.server.diagnosis.engine.rule.Rules;
-import rocks.inspectit.server.diagnosis.engine.rule.definition.RuleDefinition;
-import rocks.inspectit.server.diagnosis.engine.rule.execution.store.DefaultRuleOutputStorage;
-import rocks.inspectit.server.diagnosis.engine.rule.execution.store.IRuleOutputStorage;
-import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultCollector;
-import rocks.inspectit.server.diagnosis.engine.session.result.ISessionResultHandler;
+import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
+import rocks.inspectit.server.diagnosis.engine.rule.RuleDefinition;
+import rocks.inspectit.server.diagnosis.engine.rule.store.DefaultRuleOutputStorage;
+import rocks.inspectit.server.diagnosis.engine.rule.store.IRuleOutputStorage;
+import rocks.inspectit.server.diagnosis.engine.session.ISessionResultCollector;
+import rocks.inspectit.server.diagnosis.engine.session.ISessionResultHandler;
 
 import java.util.ArrayList;
 import java.util.HashSet;

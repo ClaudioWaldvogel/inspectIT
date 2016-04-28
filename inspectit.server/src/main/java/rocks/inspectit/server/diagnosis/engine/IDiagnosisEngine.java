@@ -3,9 +3,7 @@
  */
 package rocks.inspectit.server.diagnosis.engine;
 
-import org.springframework.stereotype.Component;
-
-import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
+import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
 
 /**
  * @author Claudio Waldvogel

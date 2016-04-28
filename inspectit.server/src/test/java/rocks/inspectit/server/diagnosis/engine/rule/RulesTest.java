@@ -4,8 +4,9 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
 import org.testng.annotations.Test;
-import rocks.inspectit.server.diagnosis.engine.rule.api.*;
-import rocks.inspectit.server.diagnosis.engine.rule.definition.*;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.*;
+import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleDefinitionException;
+import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.shared.all.testbase.TestBase;
 
@@ -28,8 +29,8 @@ public class RulesTest extends TestBase {
             assertThat(definition.getFireCondition().getTagTypes(), containsInAnyOrder("T1", "T2"));
 
             // Test tag injections
-            TagInjection tagInjection = new TagInjection("T1", ValidAndAnnotated.class.getDeclaredField("t1AsTag"), InjectionType.BY_TAG);
-            TagInjection tagInjection1 = new TagInjection("T2", ValidAndAnnotated.class.getDeclaredField("t2TagValue"), InjectionType.BY_VALUE);
+            TagInjection tagInjection = new TagInjection("T1", ValidAndAnnotated.class.getDeclaredField("t1AsTag"), TagValue.InjectionStrategy.BY_TAG);
+            TagInjection tagInjection1 = new TagInjection("T2", ValidAndAnnotated.class.getDeclaredField("t2TagValue"), TagValue.InjectionStrategy.BY_VALUE);
             assertThat(definition.getTagInjections(), is(notNullValue()));
             assertThat(definition.getTagInjections(), containsInAnyOrder(tagInjection, tagInjection1));
 
@@ -39,7 +40,7 @@ public class RulesTest extends TestBase {
             assertThat(definition.getSessionVariableInjections(), containsInAnyOrder(s1, s2));
 
             // Test action method
-            assertThat(definition.getActionMethod(), is(new ActionMethod(ValidAndAnnotated.class.getDeclaredMethod("action"), "T2", Quantity.SINGLE)));
+            assertThat(definition.getActionMethod(), is(new ActionMethod(ValidAndAnnotated.class.getDeclaredMethod("action"), "T2", Action.Quantity.SINGLE)));
 
             // Test condition method
             ConditionMethod conidtionMethod = new ConditionMethod("myCondition", "No way out", ValidAndAnnotated.class.getDeclaredMethod("condition"));
@@ -86,10 +87,10 @@ public class RulesTest extends TestBase {
         @SessionVariable(name = "baseline2", optional = true)
         private int baseline2;
 
-        @TagValue(tagType = "T1", injectionType = InjectionType.BY_TAG)
+        @TagValue(type = "T1", injectionStrategy = TagValue.InjectionStrategy.BY_TAG)
         public Tag t1AsTag;
 
-        @TagValue(tagType = "T2", injectionType = InjectionType.BY_VALUE)
+        @TagValue(type = "T2", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
         public String t2TagValue;
 
         @Condition(name = "myCondition", hint = "No way out")
@@ -105,10 +106,10 @@ public class RulesTest extends TestBase {
 
     public static class ValidNotAnnotated {
 
-        @TagValue(tagType = "root", injectionType = InjectionType.BY_TAG)
+        @TagValue(type = "root", injectionStrategy = TagValue.InjectionStrategy.BY_TAG)
         private Tag rootTag;
 
-        @TagValue(tagType = "T1")
+        @TagValue(type = "T1")
         private String t1Value;
 
         @SessionVariable(name = "baseline", optional = false)
@@ -122,19 +123,19 @@ public class RulesTest extends TestBase {
     }
 
     public static class NoActionMethodDefined {
-        @TagValue(tagType = "T1", injectionType = InjectionType.BY_TAG)
+        @TagValue(type = "T1", injectionStrategy = TagValue.InjectionStrategy.BY_TAG)
         public Tag t;
     }
 
     public static class InvalidActionMethodReturnType {
-        @Action(resultTag = "T2", resultQuantity = Quantity.MULTIPLE)
+        @Action(resultTag = "T2", resultQuantity = Action.Quantity.MULTIPLE)
         public String execute() {
             return "executed";
         }
     }
 
     public static class MultipleActionMethodsDefined {
-        @TagValue(tagType = "T1", injectionType = InjectionType.BY_TAG)
+        @TagValue(type = "T1", injectionStrategy = TagValue.InjectionStrategy.BY_TAG)
         public Tag t;
 
         @Action(resultTag = "T1")

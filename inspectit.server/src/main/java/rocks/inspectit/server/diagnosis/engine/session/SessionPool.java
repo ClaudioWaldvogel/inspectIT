@@ -3,7 +3,6 @@ package rocks.inspectit.server.diagnosis.engine.session;
 import org.apache.commons.pool.impl.GenericObjectPool;
 
 import rocks.inspectit.server.diagnosis.engine.DiagnosisEngineConfiguration;
-import rocks.inspectit.server.diagnosis.engine.util.SessionVariables;
 
 /**
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
