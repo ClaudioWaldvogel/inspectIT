@@ -32,6 +32,7 @@ public class Tag {
 		}
 	}
 
+
 	/**
 	 * Gets {@link #type}.
 	 *

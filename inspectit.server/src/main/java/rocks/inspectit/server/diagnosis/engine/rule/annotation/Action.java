@@ -48,7 +48,7 @@ public @interface Action {
 	String resultTag();
 
 	/**
-	 * @return The required resultQuantity. Default is SINGLE
+	 * @return The required resultQuantity. Default is SINGLE.
 	 * @see Quantity
 	 */
 	Action.Quantity resultQuantity() default Action.Quantity.SINGLE;

@@ -7,58 +7,107 @@ import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleExecutionExcep
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * Represents the action method of a rule. An <code>ActionMethod</code> reflects the {@link Action} annotation.
+ *
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @see Action
  */
 public class ActionMethod {
 
+	/**
+	 * The {@link Method} to be invoked.
+	 */
 	private final Method method;
-	private final String resultTag;
-	private final Action.Quantity outputQuantity;
 
-	public ActionMethod(Method method, String resultTag, Action.Quantity outputQuantity) {
+	/**
+	 * The tag type this action produces.
+	 *
+	 * @see Action#resultTag()
+	 */
+	private final String resultTag;
+
+	/**
+	 * The output Quantity.
+	 *
+	 * @see Action#resultQuantity()
+	 */
+	private final Action.Quantity resultQuantity;
+
+	/**
+	 * Default Constructor
+	 *
+	 * @param method
+	 * 		The method to be invoked
+	 * @param resultTag
+	 * 		The type of tags this action produces
+	 * @param resultQuantity
+	 * 		The result Quantity
+	 */
+	public ActionMethod(Method method, String resultTag, Action.Quantity resultQuantity) {
 		this.method = checkNotNull(method, "The method must not be null.");
 		this.resultTag = checkNotNull(resultTag, "The result tag must not be null.");
-		this.outputQuantity = checkNotNull(outputQuantity, "The output quantity must not be null.");
+		this.resultQuantity = checkNotNull(resultQuantity, "The output quantity must not be null.");
 	}
 
 	// -------------------------------------------------------------
 	// Methods: Execution
 	// -------------------------------------------------------------
 
+	/**
+	 * Executes the action.
+	 *
+	 * @param context
+	 * 		The current executing <code>ExecutionContext</code>
+	 * @return A collection of <code>Tags</code>s
+	 * @throws RuleExecutionException
+	 * 		RuleExecutionException is raised if the execution fails
+	 * @see ExecutionContext
+	 * @see Tag
+	 */
 	public Collection<Tag> execute(ExecutionContext context) {
 		try {
 			Object result = getMethod().invoke(context.getInstance());
 			return transform(result, context);
-		} catch (InvocationTargetException | IllegalAccessException e) {
+		} catch (Exception e) {
 			throw new RuleExecutionException("Failed to invoke action method.", context, e);
 		}
 	}
 
-	private Collection<Tag> transform(Object outcome, ExecutionContext context) {
+	/**
+	 * Transforms the result of a rule to a collection of <code>Tag</code>s. How the result is transformed is controlled by the #resultQuantity property.
+	 *
+	 * @param result
+	 * 		The result to be transformed
+	 * @param context
+	 * 		The <code>ExecutionContext</code> enclosing this execution
+	 * @return A collection of <code>Tag</code>s
+	 * @see Tag
+	 * @see ExecutionContext
+	 */
+	private Collection<Tag> transform(Object result, ExecutionContext context) {
 		Collection<Tag> transformed = Lists.newArrayList();
-		if (outcome != null) {
-			switch (getOutputQuantity()) {
-			case SINGLE:
-				transformed.add(Tags.tag(getResultTag(), outcome, context.getRuleInput().getRoot()));
-				break;
+		if (result != null) {
+			switch (getResultQuantity()) {
 			case MULTIPLE:
-			default:
 				Object[] values;
-				if (outcome.getClass().isArray()) {
-					values = (Object[]) outcome;
-				} else if (outcome instanceof Iterable<?>) {
-					values = Iterables.toArray((Iterable<?>) outcome, Object.class);
+				if (result.getClass().isArray()) {
+					values = (Object[]) result;
+				} else if (result instanceof Iterable<?>) {
+					values = Iterables.toArray((Iterable<?>) result, Object.class);
 				} else {
 					throw new RuleExecutionException("If resultQuantity is MULTIPLE ensure that either an Array or a Collection is defined as return value", context);
 				}
 				transformed.addAll(Tags.tags(getResultTag(), context.getRuleInput().getRoot(), values));
+				break;
+			case SINGLE:
+			default:
+				transformed.add(Tags.tag(getResultTag(), result, context.getRuleInput().getRoot()));
 			}
 		}
 		return transformed;
@@ -87,12 +136,12 @@ public class ActionMethod {
 	}
 
 	/**
-	 * Gets {@link #outputQuantity}.
+	 * Gets {@link #resultQuantity}.
 	 *
-	 * @return {@link #outputQuantity}
+	 * @return {@link #resultQuantity}
 	 */
-	public Action.Quantity getOutputQuantity() {
-		return outputQuantity;
+	public Action.Quantity getResultQuantity() {
+		return resultQuantity;
 	}
 
 	// -------------------------------------------------------------
@@ -101,7 +150,7 @@ public class ActionMethod {
 
 	@Override
 	public String toString() {
-		return "ActionMethod{" + "method=" + method + ", resultTag='" + resultTag + '\'' + ", outputQuantity=" + outputQuantity + '}';
+		return "ActionMethod{" + "method=" + method + ", resultTag='" + resultTag + '\'' + ", resultQuantity=" + resultQuantity + '}';
 	}
 
 	@Override
@@ -121,7 +170,7 @@ public class ActionMethod {
 		if (getResultTag() != null ? !getResultTag().equals(method1.getResultTag()) : method1.getResultTag() != null) {
 			return false;
 		}
-		return getOutputQuantity() == method1.getOutputQuantity();
+		return getResultQuantity() == method1.getResultQuantity();
 
 	}
 
@@ -129,8 +178,7 @@ public class ActionMethod {
 	public int hashCode() {
 		int result = getMethod() != null ? getMethod().hashCode() : 0;
 		result = 31 * result + (getResultTag() != null ? getResultTag().hashCode() : 0);
-		result = 31 * result + (getOutputQuantity() != null ? getOutputQuantity().hashCode() : 0);
+		result = 31 * result + (getResultQuantity() != null ? getResultQuantity().hashCode() : 0);
 		return result;
 	}
-
 }

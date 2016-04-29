@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
  * 	private String sessionVariable;
  *
  * 	@literal @literal @Condition(name = "check", hint = "How to pass the condition.")
- * 	public boolean codition() {
+ * 	public boolean condition() {
  * 		return true;
  * 	}
  *

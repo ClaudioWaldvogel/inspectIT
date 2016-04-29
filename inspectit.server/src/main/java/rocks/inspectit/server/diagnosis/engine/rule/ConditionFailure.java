@@ -2,22 +2,36 @@ package rocks.inspectit.server.diagnosis.engine.rule;
 
 import com.google.common.base.Objects;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 /**
- *
+ * Provides information about a failed condition.
  *
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
  */
 public class ConditionFailure {
 
+	/**
+	 * The name of the failed condition.
+	 */
 	private final String conditionName;
+
+	/**
+	 * A hint why the condition failed. If possible, a solution can be provided.
+	 */
 	private final String hint;
 
 	/**
+	 * Default Constructor
 	 *
 	 * @param conditionName
+	 * 		The name of the failed condition
 	 * @param hint
+	 * 		A hint why the condition failed
 	 */
 	public ConditionFailure(String conditionName, String hint) {
+		checkArgument(!isNullOrEmpty(conditionName), "The condition name must not be null!");
 		this.conditionName = conditionName;
 		this.hint = hint;
 	}

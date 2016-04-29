@@ -16,8 +16,8 @@ import static org.hamcrest.Matchers.*;
 /**
  * @author Claudio Waldvogel
  */
+@SuppressWarnings("All")
 public class RulesTest extends TestBase {
-
 
     public static class Define extends RulesTest {
 
@@ -43,8 +43,8 @@ public class RulesTest extends TestBase {
             assertThat(definition.getActionMethod(), is(new ActionMethod(ValidAndAnnotated.class.getDeclaredMethod("action"), "T2", Action.Quantity.SINGLE)));
 
             // Test condition method
-            ConditionMethod conidtionMethod = new ConditionMethod("myCondition", "No way out", ValidAndAnnotated.class.getDeclaredMethod("condition"));
-            assertThat(definition.getConditionMethods(), containsInAnyOrder(conidtionMethod));
+            ConditionMethod conditionMethod = new ConditionMethod("myCondition", "No way out", ValidAndAnnotated.class.getDeclaredMethod("condition"));
+            assertThat(definition.getConditionMethods(), containsInAnyOrder(conditionMethod));
 
         }
 
@@ -52,7 +52,7 @@ public class RulesTest extends TestBase {
         public void testWithoutRuleAnnotation() {
             RuleDefinition definition = Rules.define(ValidNotAnnotated.class);
             assertThat(definition.getName(), is("rocks.inspectit.server.diagnosis.engine.rule.RulesTest$ValidNotAnnotated"));
-            assertThat(definition.getDescription(), is(RuleDefinition.NON_DESCRIPTION));
+            assertThat(definition.getDescription(), is(RuleDefinition.EMPTY_DESCRIPTION));
             assertThat(definition.getFireCondition().getTagTypes(), containsInAnyOrder("T1", "root"));
         }
 

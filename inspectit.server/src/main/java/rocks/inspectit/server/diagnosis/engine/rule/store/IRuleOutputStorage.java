@@ -9,23 +9,65 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * Defines a container to store all outputs generated while executing rules.
+ *
+ * @author Claudio Waldvogel
  */
 public interface IRuleOutputStorage {
 
-    void insert(Collection<RuleOutput> output);
+	/**
+	 * Stores a new <code>RuleOutput</code> to the storage
+	 *
+	 * @param output
+	 * 		The <code>RuleOutput</code> to be stored
+	 */
+	void store(RuleOutput output);
 
-    void insert(RuleOutput output);
+	/**
+	 * Stores a collection of <code>RuleOutput</code>sM
+	 *
+	 * @param outputs
+	 * 		The <code>RuleOutput</code>s to be stored
+	 */
+	void store(Collection<RuleOutput> outputs);
 
-    Set<String> availableTagTypes();
+	/**
+	 * Method is used to check which different kind of tags are currently available in the storage.
+	 *
+	 * @return All currently available types of tags
+	 */
+	Set<String> getAvailableTagTypes();
 
-    Collection<RuleOutput> findLeafsByTags(Set<String> requestedTypes);
+	/**
+	 * @param requestedTypes
+	 * @return
+	 */
+	Collection<RuleOutput> findLeafsByTags(Set<String> requestedTypes);
 
-    Multimap<String, RuleOutput> getAllOutputsWithConditionErrors();
+	/**
+	 * Delivers a <code>Multimap</code> of all <code>RuleOutput</code>s which did not complete due to condition errors. The <code>Multimap</code> is indexed by the the tag type this RuleOutput should
+	 * contain, if the execution would not have been skipped.
+	 *
+	 * @return A Multimap containing all <code>RuleOutput</code>s with condition failures
+	 */
+	Multimap<String, RuleOutput> getAllOutputsWithConditionFailures();
 
-    Multimap<String, RuleOutput> getAllOutputs();
+	/**
+	 * @return All already collected <code>RuleOutput</code> indexed by the containing tag type
+	 */
+	Multimap<String, RuleOutput> getAllOutputs();
 
-    Multimap<String, Tag> mapTags(TagState state);
+	/**
+	 * Creates a Multimap, indexed by the tag type, of all <code>Tag</code>s of a certain state.
+	 *
+	 * @param state
+	 * 		The state which is used to filter the Tags
+	 * @return Multimap of all Tags matching a certain state
+	 */
+	Multimap<String, Tag> mapTags(TagState state);
 
-    void clear();
+	/**
+	 * Clear the storage. After the storage is cleared it has to be in the initial state. This means that it can directly be reused.
+	 */
+	void clear();
 }

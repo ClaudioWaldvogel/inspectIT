@@ -15,6 +15,7 @@ import rocks.inspectit.shared.all.testbase.TestBase;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 /**
@@ -43,6 +44,7 @@ public class SessionVariableInjectionTest extends TestBase {
         @Test
         public void shouldInjectValue() {
             //prepare
+            doReturn(true).when(variables).containsKey("var");
             when(variables.get("var")).thenReturn(123);
             //execute
             new SessionVariableInjection("var", false, RuleDummy.sessionVariableIntField()).execute(context);

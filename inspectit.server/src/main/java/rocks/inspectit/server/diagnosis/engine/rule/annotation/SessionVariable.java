@@ -31,5 +31,4 @@ public @interface SessionVariable {
 	 * @return flag if session variable is optional
 	 */
 	boolean optional() default false;
-
 }

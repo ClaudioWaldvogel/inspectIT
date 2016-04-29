@@ -61,7 +61,7 @@ public final class Rules {
 
 		Rule rule = findAnnotation(Rule.class, clazz);
 		String name = rule != null ? rule.name() : clazz.getName();
-		String description = rule != null ? rule.description() : RuleDefinition.NON_DESCRIPTION;
+		String description = rule != null ? rule.description() : RuleDefinition.EMPTY_DESCRIPTION;
 		FireCondition fireCondition = describeFireCondition(rule, tagInjections);
 
 		return new RuleDefinition(name, description, clazz, fireCondition, conditionMethods, actionMethod, tagInjections, variableInjections);
@@ -81,7 +81,7 @@ public final class Rules {
 		} else {
 			Set<String> requiredTypes = new HashSet<>();
 			for (TagInjection injection : tagInjections) {
-				requiredTypes.add(injection.getTagType());
+				requiredTypes.add(injection.getType());
 			}
 			return new FireCondition(requiredTypes);
 		}
@@ -160,7 +160,7 @@ public final class Rules {
 				throw new RuleDefinitionException(msg);
 			}
 			//ensure proper return type in case of MULTIPLE outputQuantity
-			if (action.getOutputQuantity().equals(Action.Quantity.MULTIPLE)) {
+			if (action.getResultQuantity().equals(Action.Quantity.MULTIPLE)) {
 				Class<?> returnType = action.getMethod().getReturnType();
 				if (!returnType.isArray() && !Iterable.class.isAssignableFrom(returnType)) {
 					String msg = method.getDeclaringClass().getName() + "defines an MULTIPLE outputQuantity, but return type is neither Array nor Collection.";

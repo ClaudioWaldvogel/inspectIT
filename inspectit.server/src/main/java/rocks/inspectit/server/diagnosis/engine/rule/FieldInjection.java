@@ -3,80 +3,106 @@
  */
 package rocks.inspectit.server.diagnosis.engine.rule;
 
-import com.google.common.base.Preconditions;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleExecutionException;
 
 import java.lang.reflect.Field;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * @author Claudio Waldvogel
+ * Base class for classes which need to inject a value to a field.
  *
+ * @author Claudio Waldvogel
  */
 public abstract class FieldInjection {
 
-	private final Field target;
-
 	/**
-	 * @param target
+	 * The target field where to inject a value.
 	 */
-	public FieldInjection(Field target) {
-		this.target = Preconditions.checkNotNull(target, "The target field must not be null.");
-		// Ensure that field is accessible
-		this.target.setAccessible(true);
-	}
-
-	public abstract void execute(ExecutionContext context);
+	private final Field injectee;
 
 	/**
-	 * Gets {@link #target}.
+	 * Default constructor
 	 *
-	 * @return {@link #target}
+	 * @param injectee
+	 * 		The target field
 	 */
-	public Field getTarget() {
-		return target;
+	public FieldInjection(Field injectee) {
+		this.injectee = checkNotNull(injectee, "The injectee must not be null.");
+		// Ensure that field is accessible
+		this.injectee.setAccessible(true);
 	}
+
+	/**
+	 * Performs the injection.
+	 *
+	 * @param context
+	 * 		The current valid <code>ExecutionContext</code>
+	 * @throws RuleExecutionException
+	 * 		if the injection fails
+	 * @see ExecutionContext
+	 */
+	public void execute(ExecutionContext context) {
+		Object toInject = determineValueToInject(context);
+		try {
+			getInjectee().set(context.getInstance(), toInject);
+		} catch (IllegalAccessException e) {
+			throw new RuleExecutionException("Failed to injected \'" + toInject + "\' to \'" + getInjectee().getName() + "\'", context, e);
+		}
+	}
+
+	/**
+	 * Method determines the value to be injected to {@link #injectee}.
+	 *
+	 * @param context
+	 * 		The <code>ExecutionContext</code>
+	 * @return Any object, or null, to be injected to {@link #injectee}
+	 */
+	protected abstract Object determineValueToInject(ExecutionContext context);
+
+	//-------------------------------------------------------------
+	// Methods: Accessors
+	//-------------------------------------------------------------
+
+	/**
+	 * Gets {@link #injectee}.
+	 *
+	 * @return {@link #injectee}
+	 */
+	public Field getInjectee() {
+		return injectee;
+	}
+
+	//-------------------------------------------------------------
+	// Methods: Generated
+	//-------------------------------------------------------------
 
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public String toString() {
-		return "FieldInjection [target=" + target + "]";
+		return new ToStringBuilder(this).append("target", injectee).toString();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+
+		if (o == null || getClass() != o.getClass())
+			return false;
+
+		FieldInjection that = (FieldInjection) o;
+
+		return new EqualsBuilder().append(getInjectee(), that.getInjectee()).isEquals();
+	}
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((target == null) ? 0 : target.hashCode());
-		return result;
+		return new HashCodeBuilder(17, 37).append(getInjectee()).toHashCode();
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		}
-		if (obj == null) {
-			return false;
-		}
-		if (getClass() != obj.getClass()) {
-			return false;
-		}
-		FieldInjection other = (FieldInjection) obj;
-		if (target == null) {
-			if (other.target != null) {
-				return false;
-			}
-		} else if (!target.equals(other.target)) {
-			return false;
-		}
-		return true;
-	}
-
 }

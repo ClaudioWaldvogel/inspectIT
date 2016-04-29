@@ -138,7 +138,7 @@ public class Session<I, R> implements Callable<R> {
 	public Session<I, R> process() {
 		switch (state) {
 		case ACTIVATED:
-			sessionContext.getStorage().insert(Rules.triggerRuleOutput(sessionContext.getInput()));
+			sessionContext.getStorage().store(Rules.triggerRuleOutput(sessionContext.getInput()));
 			doProcess();
 			state = State.PROCESSED;
 			break;
@@ -210,13 +210,16 @@ public class Session<I, R> implements Callable<R> {
 				List<Future<Collection<RuleOutput>>> futures = executor.invokeAll(nextRules);
 				for (Future<Collection<RuleOutput>> future : futures) {
 					try {
-						// insert latest results in storage.
+						// store latest results in storage.
 						// The insertion waits till the future returns
-						sessionContext.getStorage().insert(future.get());
+						sessionContext.getStorage().store(future.get());
 					} catch (Exception ex) {
+
+						// TODO Clean and ensure a proper Session state for further processing
 						sessionContext.passivate();
 						state = State.PASSIVATED;
-						// TODO Clean and ensure a proper Session state for further processing
+
+
 						throw new SessionException("Failed to retrieve RuleOutput", ex);
 					}
 				}
@@ -228,7 +231,7 @@ public class Session<I, R> implements Callable<R> {
 	}
 
 	private Set<Execution> findNextRules() {
-		Set<String> available = sessionContext.getStorage().availableTagTypes();
+		Set<String> available = sessionContext.getStorage().getAvailableTagTypes();
 		Set<Execution> nextRules = new HashSet<>();
 		Iterator<RuleDefinition> iterator = sessionContext.getRuleSet().iterator();
 		while (iterator.hasNext()) {
