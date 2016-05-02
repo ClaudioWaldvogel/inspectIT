@@ -3,23 +3,17 @@
  */
 package rocks.inspectit.server.diagnosis.service;
 
-import rocks.inspectit.server.diagnosis.engine.DiagnosisEngine;
-import rocks.inspectit.server.diagnosis.engine.DiagnosisEngineConfiguration;
 import rocks.inspectit.server.diagnosis.engine.IDiagnosisEngine;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Action;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Rule;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue;
-import rocks.inspectit.server.diagnosis.engine.rule.store.DefaultRuleOutputStorage;
 import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResult;
-import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResultCollector;
-import rocks.inspectit.server.diagnosis.engine.session.ISessionResultHandler;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 import rocks.inspectit.shared.all.communication.data.InvocationSequenceData;
 import rocks.inspectit.shared.all.communication.data.TimerData;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,26 +44,16 @@ public class DiagnosisServiceImpl implements IDiagnosisService {
 
 	@PostConstruct
 	public void init() {
-		results = new ArrayList<>();
+		/*results = new ArrayList<>();
 
 		DiagnosisEngineConfiguration<InvocationSequenceData, DefaultSessionResult<InvocationSequenceData>> configuration = new DiagnosisEngineConfiguration<InvocationSequenceData, DefaultSessionResult<InvocationSequenceData>>()
 				.setNumSessionWorkers(2).setRuleClass(ExtractLoggingData.class).setRuleClass(InspectLogginData.class).setStorageClass(DefaultRuleOutputStorage.class)
-				.setResultCollector(new DefaultSessionResultCollector<InvocationSequenceData>()).setResultHandler(new DiagnosisResultHandler());
+				.setResultCollector(new DefaultSessionResultCollector<InvocationSequenceData>()).setSessionCallback(new DiagnosisResultHandler());
 
-		engine = new DiagnosisEngine<>(configuration);
+		engine = new DiagnosisEngine<>(configuration);*/
 
 	}
 
-	private class DiagnosisResultHandler implements ISessionResultHandler<DefaultSessionResult<InvocationSequenceData>> {
-
-		/**
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void handle(DefaultSessionResult<InvocationSequenceData> result) {
-			DiagnosisServiceImpl.this.results.add(result);
-		}
-	}
 
 	@Rule(name = "ExtractLoggingData")
 	public static class ExtractLoggingData {

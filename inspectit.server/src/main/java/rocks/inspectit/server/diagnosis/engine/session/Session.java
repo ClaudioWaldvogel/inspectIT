@@ -3,10 +3,10 @@ package rocks.inspectit.server.diagnosis.engine.session;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
 import rocks.inspectit.server.diagnosis.engine.rule.RuleDefinition;
 import rocks.inspectit.server.diagnosis.engine.rule.RuleInput;
 import rocks.inspectit.server.diagnosis.engine.rule.RuleOutput;
+import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
 import rocks.inspectit.server.diagnosis.engine.rule.store.IRuleOutputStorage;
 import rocks.inspectit.server.diagnosis.engine.session.exception.SessionException;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
@@ -106,10 +106,6 @@ public class Session<I, R> implements Callable<R> {
 		return process().collectResults();
 	}
 
-	public R collectResults() {
-		return resultCollector.collect(sessionContext);
-	}
-
 	// -------------------------------------------------------------
 	// Methods: LifeCycle -> reflects the life cycle of a
 	// org.apache.commons.pool2.PooledObject
@@ -129,6 +125,7 @@ public class Session<I, R> implements Callable<R> {
 			break;
 		case DESTROYED:
 			throw new IllegalStateException("Session already destroyed.");
+		case FAILURE:
 		default:
 			throw new IllegalStateException("Session can not enter ACTIVATED stated from: " + state + " state. Ensure Session is in NEW or PASSIVATED state when activating.");
 		}
@@ -142,6 +139,7 @@ public class Session<I, R> implements Callable<R> {
 			doProcess();
 			state = State.PROCESSED;
 			break;
+		case FAILURE:
 		default:
 			throw new IllegalStateException("Session can not enter process stated from: " + state + "state. Ensure that Session is in ACTIVATED state before processing.");
 		}
@@ -151,6 +149,7 @@ public class Session<I, R> implements Callable<R> {
 	public Session<I, R> passivate() {
 		switch (state) {
 		case PROCESSED:
+		case FAILURE:
 			sessionContext.passivate();
 			state = State.PASSIVATED;
 			break;
@@ -168,6 +167,7 @@ public class Session<I, R> implements Callable<R> {
 
 	public Session<I, R> destroy() {
 		switch (state) {
+		case FAILURE:
 		case PROCESSED:
 			// We can destroy the session but it was not yet passivated. To stay in sync with the
 			// state lifeCycle we passivate first
@@ -199,6 +199,10 @@ public class Session<I, R> implements Callable<R> {
 		return this;
 	}
 
+	public R collectResults() {
+		return resultCollector.collect(sessionContext);
+	}
+
 	// -------------------------------------------------------------
 	// Methods: Internals
 	// -------------------------------------------------------------
@@ -214,13 +218,7 @@ public class Session<I, R> implements Callable<R> {
 						// The insertion waits till the future returns
 						sessionContext.getStorage().store(future.get());
 					} catch (Exception ex) {
-
-						// TODO Clean and ensure a proper Session state for further processing
-						sessionContext.passivate();
-						state = State.PASSIVATED;
-
-
-						throw new SessionException("Failed to retrieve RuleOutput", ex);
+						handleFailure(ex);
 					}
 				}
 			} catch (InterruptedException ex) {
@@ -228,6 +226,15 @@ public class Session<I, R> implements Callable<R> {
 			}
 			nextRules = findNextRules();
 		}
+	}
+
+	private void handleFailure(Exception cause) {
+		//enter failure state
+		state = State.FAILURE;
+		//ensure that Session gets passivated to ensure a proper state to reuse this session instance
+		passivate();
+		//Propagate the cause of failure
+		throw new SessionException("Diagnosis Session failed with error(s)", cause);
 	}
 
 	private Set<Execution> findNextRules() {
@@ -292,27 +299,29 @@ public class Session<I, R> implements Callable<R> {
 		NEW,
 
 		/**
-		 * The state as soon as an <code>Session</code> gets activated. This stated can be entered
-		 * from <code>NEW</code> and <code>PASSIVATED</code> states.
+		 * The state as soon as an <code>Session</code> gets activated. This stated can be entered from <code>NEW</code> and <code>PASSIVATED</code> states.
 		 */
 		ACTIVATED,
 
 		/**
-		 * An <code>Session</code> enters the <code>PROCESSING</code> state after all applicable
-		 * rules were executed.
+		 * An <code>Session</code> enters the <code>PROCESSING</code> state after all applicable rules were executed.
 		 */
 		PROCESSED,
 		/**
-		 * An <code>Session</code> can enter the <code>PASSIVATED</code> stated only from
-		 * <code>PROCESSED</code> stated. <code>PASSIVATED</code> is the only state which enables a
-		 * transition back to <code>ACTIVATED</code>.
+		 * An <code>Session</code> can enter the <code>PASSIVATED</code> stated only from <code>PROCESSED</code> stated. <code>PASSIVATED</code> is the only state which enables a transition back to
+		 * <code>ACTIVATED</code>.
 		 */
 		PASSIVATED,
 
 		/**
 		 * <code>Session</code> is destroyed and not longer usable.
 		 */
-		DESTROYED
+		DESTROYED,
+
+		/**
+		 * <code>Session</code> encountered an error and is in a failure stated.
+		 */
+		FAILURE
 	}
 
 }

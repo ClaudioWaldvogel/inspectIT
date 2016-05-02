@@ -75,7 +75,7 @@ public class ActionMethod {
 			Object result = getMethod().invoke(context.getInstance());
 			return transform(result, context);
 		} catch (Exception e) {
-			throw new RuleExecutionException("Failed to invoke action method.", context, e);
+			throw new RuleExecutionException("Failed to invoke action method (" + getMethod().getName() + ")", context, e);
 		}
 	}
 

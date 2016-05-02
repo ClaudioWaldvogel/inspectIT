@@ -47,7 +47,7 @@ public class RuleExecutionException extends RuntimeException {
 	 * @return Enriched error message
 	 */
 	private static String prefix(String message, ExecutionContext context) {
-		return "Rule: (" + context.getDefinition().getName() + ") failed with error: " + message;
+		return "Rule: \'" + context.getDefinition().getName() + "\' failed with error: " + message;
 	}
 
 }

@@ -1,11 +1,11 @@
 package rocks.inspectit.server.diagnosis.engine;
 
-import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
 import rocks.inspectit.server.diagnosis.engine.rule.RuleDefinition;
+import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
 import rocks.inspectit.server.diagnosis.engine.rule.store.DefaultRuleOutputStorage;
 import rocks.inspectit.server.diagnosis.engine.rule.store.IRuleOutputStorage;
+import rocks.inspectit.server.diagnosis.engine.session.ISessionCallback;
 import rocks.inspectit.server.diagnosis.engine.session.ISessionResultCollector;
-import rocks.inspectit.server.diagnosis.engine.session.ISessionResultHandler;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,14 +28,14 @@ public class DiagnosisEngineConfiguration<I, R> {
     private Set<RuleDefinition> ruleDefinitions;
     private ExecutorService executorService;
     private Class<? extends IRuleOutputStorage> storageClass = DefaultRuleOutputStorage.class;
-    private List<ISessionResultHandler<R>> handler;
+    private List<ISessionCallback<R>> callbacks;
 
     //TODO instance vs. class
     private ISessionResultCollector<I, R> resultCollector;
 
     public DiagnosisEngineConfiguration() {
         ruleDefinitions = new HashSet<>();
-        handler = new ArrayList<>();
+        callbacks = new ArrayList<>();
     }
 
     public DiagnosisEngineConfiguration<I, R> setNumSessionWorkers(int numSessionWorkers) {
@@ -79,13 +79,13 @@ public class DiagnosisEngineConfiguration<I, R> {
         return this;
     }
 
-    public DiagnosisEngineConfiguration<I, R> setResultHandler(ISessionResultHandler<R> listener) {
-        this.handler.add(listener);
+    public DiagnosisEngineConfiguration<I, R> setSessionCallback(ISessionCallback<R> listener) {
+        this.callbacks.add(listener);
         return this;
     }
 
-    public DiagnosisEngineConfiguration<I, R> setResultHandlers(List<ISessionResultHandler<R>> handler) {
-        this.handler.addAll(handler);
+    public DiagnosisEngineConfiguration<I, R> setSessionCallbacks(List<ISessionCallback<R>> handler) {
+        this.callbacks.addAll(handler);
         return this;
     }
 
@@ -153,11 +153,11 @@ public class DiagnosisEngineConfiguration<I, R> {
     }
 
     /**
-     * Gets {@link #handler}.
+     * Gets {@link #callbacks}.
      *
-     * @return {@link #handler}
+     * @return {@link #callbacks}
      */
-    public List<ISessionResultHandler<R>> getHandler() {
-        return handler;
+    public List<ISessionCallback<R>> getSessionCallbacks() {
+        return callbacks;
     }
 }

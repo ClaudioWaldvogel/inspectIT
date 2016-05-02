@@ -6,9 +6,9 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rocks.inspectit.server.diagnosis.engine.session.ISessionCallback;
 import rocks.inspectit.server.diagnosis.engine.session.Session;
 import rocks.inspectit.server.diagnosis.engine.session.SessionPool;
-import rocks.inspectit.server.diagnosis.engine.session.ISessionResultHandler;
 import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
 
 import java.util.concurrent.ExecutorService;
@@ -50,12 +50,12 @@ public class DiagnosisEngine<I, R> implements IDiagnosisEngine<I> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void analyze(I input) throws Exception {
+	public void analyze(I input) {
 		analyze(input, new SessionVariables());
 	}
 
 	@Override
-	public void analyze(I input, SessionVariables variables) throws Exception {
+	public void analyze(I input, SessionVariables variables) {
 		synchronized (this) {
 			final Session<I, R> session;
 			try {
@@ -66,34 +66,35 @@ public class DiagnosisEngine<I, R> implements IDiagnosisEngine<I> {
 
 			// Kick of the session execution
 			Futures.addCallback(sessionExecutor.submit(session), new FutureCallback<R>() {
+
 				@Override
 				public void onSuccess(R result) {
 					returnSession();
-					for (ISessionResultHandler<R> handler : configuration.getHandler()) {
-						handler.handle(result);
+					for (ISessionCallback<R> handler : configuration.getSessionCallbacks()) {
+						handler.onSuccess(result);
 					}
 				}
 
 				@Override
 				public void onFailure(Throwable t) {
 					returnSession();
-
-					//TODO proper SessionException handling
-					throw new DiagnosisEngineException("Diagnosis Session failed", t);
+					for (ISessionCallback<R> handler : configuration.getSessionCallbacks()) {
+						handler.onFailure(t);
+					}
 				}
 
 				private void returnSession() {
 					try {
 						sessionPool.returnObject(session);
 					} catch (Exception e) {
-						throw new DiagnosisEngineException("Failed to return Session to ObjectPool.", e);
+						for (ISessionCallback<R> handler : configuration.getSessionCallbacks()) {
+							handler.onFailure(new DiagnosisEngineException("Failed to return Session to ObjectPool.", e));
+						}
 					}
 				}
 			});
 		}
 	}
-
-	;
 
 	/**
 	 * {@inheritDoc}

@@ -3,20 +3,29 @@
  */
 package rocks.inspectit.server.diagnosis.engine;
 
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import rocks.inspectit.server.diagnosis.engine.rule.RuleDefinition;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Action;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Condition;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Rule;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue;
+import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
 import rocks.inspectit.server.diagnosis.engine.rule.store.DefaultRuleOutputStorage;
 import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResult;
 import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResultCollector;
-import rocks.inspectit.server.diagnosis.engine.session.ISessionResultHandler;
+import rocks.inspectit.server.diagnosis.engine.session.ISessionCallback;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -26,18 +35,51 @@ import static com.google.common.collect.Sets.newHashSet;
 public class DiagnosisEngineTest {
 
     @Test
+    public void testScanner() {
+
+        ClassPathScanningCandidateComponentProvider provider = new ClassPathScanningCandidateComponentProvider(false);
+        // Filter to include only classes that have a particular annotation.
+        provider.addIncludeFilter(new AnnotationTypeFilter(Rule.class));
+        provider.addExcludeFilter(new RegexPatternTypeFilter(Pattern.compile("rocks.inspectit.server.diagnosis.engine.rule.execution.*")));
+        // Find classes in the given package (or subpackages)
+        Set<BeanDefinition> beans = provider.findCandidateComponents("rocks.inspectit.server.diagnosis.engine.rule");
+        for (BeanDefinition bd : beans) {
+            try {
+                if (bd instanceof AbstractBeanDefinition) {
+                    Class<?> aClass = ((AbstractBeanDefinition) bd).resolveBeanClass(DiagnosisEngineTest.this.getClass().getClassLoader());
+                    RuleDefinition define = Rules.define(aClass);
+                    System.out.println(define);
+                }
+
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Test
     public void testEngine() {
 
         final List<DefaultSessionResult<String>> results = new ArrayList<>();
 
-        DiagnosisEngineConfiguration<String, DefaultSessionResult<String>> configuration = new DiagnosisEngineConfiguration<String, DefaultSessionResult<String>>().setNumSessionWorkers(1)
-                .setNumRuleWorkers(1)
-                .setRuleClasses(newHashSet(R1.class, R2.class, R3.class)).setStorageClass(DefaultRuleOutputStorage.class).setResultCollector(new DefaultSessionResultCollector<String>())
-                .setResultHandler(new ISessionResultHandler<DefaultSessionResult<String>>() {
+        DiagnosisEngineConfiguration<String, DefaultSessionResult<String>> configuration =
+                new DiagnosisEngineConfiguration<String, DefaultSessionResult<String>>()
+                        .setNumSessionWorkers(1)
+                .setNumRuleWorkers(1).setRuleClasses(newHashSet(R1.class, R2.class, R3.class)).setStorageClass(DefaultRuleOutputStorage.class)
+                .setResultCollector(new DefaultSessionResultCollector<String>())
+                .setSessionCallback(new ISessionCallback<DefaultSessionResult<String>>() {
                     @Override
-                    public void handle(DefaultSessionResult<String> result) {
+                    public void onSuccess(DefaultSessionResult<String> result) {
+                        System.out.println("Session completed!");
                         results.add(result);
                     }
+
+                    @Override
+                    public void onFailure(Throwable t) {
+                        System.out.println("Session failed!");
+                        t.printStackTrace();
+                    }
+
                 });
 
         DiagnosisEngine<String, DefaultSessionResult<String>> diagnosisEngine = new DiagnosisEngine<>(configuration);

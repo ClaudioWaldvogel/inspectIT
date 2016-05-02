@@ -12,9 +12,9 @@ import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
  */
 public interface IDiagnosisEngine<I> {
 
-	void analyze(I input) throws Exception;
+	void analyze(I input);
 
-	void analyze(I input, SessionVariables variables) throws Exception;
+	void analyze(I input, SessionVariables variables);
 
 	void shutdown(boolean awaitShutdown) throws Exception;
 
