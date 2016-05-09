@@ -1,5 +1,6 @@
 package rocks.inspectit.server.diagnosis.engine;
 
+import com.google.common.base.Throwables;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -71,7 +72,12 @@ public class DiagnosisEngine<I, R> implements IDiagnosisEngine<I> {
 				public void onSuccess(R result) {
 					returnSession();
 					for (ISessionCallback<R> handler : configuration.getSessionCallbacks()) {
-						handler.onSuccess(result);
+						//avoid calling FutureCallback#onFailure due to errors in onSuccess
+						try {
+							handler.onSuccess(result);
+						} catch (Throwable t) {
+							LOG.warn(Throwables.getStackTraceAsString(t));
+						}
 					}
 				}
 
@@ -79,7 +85,11 @@ public class DiagnosisEngine<I, R> implements IDiagnosisEngine<I> {
 				public void onFailure(Throwable t) {
 					returnSession();
 					for (ISessionCallback<R> handler : configuration.getSessionCallbacks()) {
-						handler.onFailure(t);
+						try {
+							handler.onFailure(t);
+						} catch (Throwable throwable) {
+							LOG.warn(Throwables.getStackTraceAsString(throwable));
+						}
 					}
 				}
 

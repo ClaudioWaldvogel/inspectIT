@@ -1,20 +1,16 @@
-/**
- *
- */
 package rocks.inspectit.server.diagnosis.engine.session;
-
 
 import java.util.HashMap;
 
 /**
- * @author Claudio Waldvogel
+ * Container representing session variable in a key-value pair manner.
  *
+ * @author Claudio Waldvogel
  */
 public class SessionVariables extends HashMap<String, Object> {
 
-	private static final long serialVersionUID = -7066749243978371201L;
 	/**
-	 *
+	 * Default Constructor
 	 */
 	public SessionVariables() {
 	}

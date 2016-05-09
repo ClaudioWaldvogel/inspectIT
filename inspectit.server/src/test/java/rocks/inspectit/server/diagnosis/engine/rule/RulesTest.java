@@ -48,12 +48,9 @@ public class RulesTest extends TestBase {
 
         }
 
-        @Test
+        @Test(expectedExceptions = RuleDefinitionException.class)
         public void testWithoutRuleAnnotation() {
-            RuleDefinition definition = Rules.define(ValidNotAnnotated.class);
-            assertThat(definition.getName(), is("rocks.inspectit.server.diagnosis.engine.rule.RulesTest$ValidNotAnnotated"));
-            assertThat(definition.getDescription(), is(RuleDefinition.EMPTY_DESCRIPTION));
-            assertThat(definition.getFireCondition().getTagTypes(), containsInAnyOrder("T1", "root"));
+            RuleDefinition definition = Rules.define(MissingAnnotation.class);
         }
 
         @Test(expectedExceptions = RuleDefinitionException.class)
@@ -104,7 +101,7 @@ public class RulesTest extends TestBase {
         }
     }
 
-    public static class ValidNotAnnotated {
+    public static class MissingAnnotation {
 
         @TagValue(type = "root", injectionStrategy = TagValue.InjectionStrategy.BY_TAG)
         private Tag rootTag;

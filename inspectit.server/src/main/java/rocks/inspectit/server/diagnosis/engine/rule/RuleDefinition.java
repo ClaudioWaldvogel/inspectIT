@@ -2,6 +2,7 @@ package rocks.inspectit.server.diagnosis.engine.rule;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
@@ -112,18 +113,18 @@ public class RuleDefinition {
 	 */
 	public RuleDefinition(String name, String description, Class<?> implementation, FireCondition fireCondition, List<ConditionMethod> conditionMethods, ActionMethod actionMethod,
 			List<TagInjection> tagInjections, List<SessionVariableInjection> variableInjections) {
-		this.name = name;
-		this.description = description;
-		this.implementation = implementation;
-		this.fireCondition = fireCondition;
-		this.tagInjections = tagInjections;
-		this.actionMethod = actionMethod;
-		this.conditionMethods = conditionMethods;
-		this.variableInjections = variableInjections;
+		this.implementation = checkNotNull(implementation);
+		this.fireCondition = checkNotNull(fireCondition);
+		this.tagInjections = checkNotNull(tagInjections);
+		this.actionMethod = checkNotNull(actionMethod);
+		this.conditionMethods = checkNotNull(conditionMethods);
+		this.variableInjections = checkNotNull(variableInjections);
+		this.name = StringUtils.defaultIfEmpty(name, implementation.getName());
+		this.description = StringUtils.defaultIfEmpty(description, EMPTY_DESCRIPTION);
 	}
 
 	// -------------------------------------------------------------
-	// Methods: Execution
+	// Methods: RuleExecution
 	// -------------------------------------------------------------
 
 	/**
@@ -156,7 +157,7 @@ public class RuleDefinition {
 		/*// and there must be same amount of tags as injections points
 		checkArgument(input.getUnraveled().size() == getTagInjections().size(), "Invalid input " + "definition. Uneven quantity of input tags and @Value injection definitions.");*/
 
-		// Settle a new ExecutionContext for this run
+		// Create a new ExecutionContext for this run
 		ExecutionContext ctx = new ExecutionContext(this, tryInstantiate(getImplementation()), input, variables);
 
 		// Inject tags
@@ -178,7 +179,7 @@ public class RuleDefinition {
 			}
 		}
 
-		// Finally execute the rule's actual action if not conditions failed
+		//If no condition failed, execute the actual action
 		Collection<Tag> tags = Lists.newArrayList();
 		if (conditionFailures.size() == 0) {
 			tags = getActionMethod().execute(ctx);

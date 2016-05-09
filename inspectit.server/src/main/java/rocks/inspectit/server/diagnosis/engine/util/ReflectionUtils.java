@@ -1,5 +1,7 @@
 package rocks.inspectit.server.diagnosis.engine.util;
 
+import org.springframework.core.annotation.AnnotationUtils;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -15,54 +17,51 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ReflectionUtils {
 
-    public interface Visitor<A extends Annotation, T, R> {
-        R visit(A annotation, T type);
-    }
+	public interface Visitor<A extends Annotation, T, R> {
+		R visit(A annotation, T type);
+	}
 
-    public static <T> T tryInstantiate(Class<? extends T> clazz) {
-        try {
-            return clazz.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Failed to instantiate clazz.", e);
-        }
-    }
+	public static <T> T tryInstantiate(Class<? extends T> clazz) {
+		try {
+			return clazz.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException("Failed to instantiate clazz.", e);
+		}
+	}
 
-    public static boolean hasNoArgsConstructor(Class<?> clazz) {
-        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-            if (Modifier.isPublic(constructor.getModifiers()) && constructor.getParameterTypes().length == 0) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public static boolean hasNoArgsConstructor(Class<?> clazz) {
+		for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
+			if (Modifier.isPublic(constructor.getModifiers()) && constructor.getParameterTypes().length == 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    public static <T extends Annotation> T findAnnotation(Class<T> annotationClass, Class<?> clazz) {
-        if (clazz.isAnnotationPresent(annotationClass)) {
-            return clazz.getAnnotation(annotationClass);
-        }
-        return null;
-    }
+	public static <T extends Annotation> T findAnnotation(Class<?> clazz, Class<T> annotationClass) {
+		return AnnotationUtils.findAnnotation(clazz, annotationClass);
+	}
 
-    public static <A extends Annotation, R> List<R> visitFieldsAnnotatedWith(Class<A> annotationType, Class<?> clazz, Visitor<A, Field, R> visitor) {
-        List<R> results = new ArrayList<>();
-        // TODO should we support inheritance?
-        for (Field field : clazz.getDeclaredFields()) {
-            if (field.isAnnotationPresent(annotationType)) {
-                R result = visitor.visit(field.getAnnotation(annotationType), field);
-                results.add(checkNotNull(result, "Visitor must not return null values!"));
-            }
-        }
-        return results;
-    }
+	public static <A extends Annotation, R> List<R> visitFieldsAnnotatedWith(Class<A> annotationType, Class<?> clazz, Visitor<A, Field, R> visitor) {
+		List<R> results = new ArrayList<>();
+		// TODO should we support inheritance?
+		for (Field field : clazz.getDeclaredFields()) {
+			if (field.isAnnotationPresent(annotationType)) {
+				R result = visitor.visit(field.getAnnotation(annotationType), field);
+				results.add(checkNotNull(result, "Visitor must not return null values!"));
+			}
+		}
+		return results;
+	}
 
-    public static <A extends Annotation, R> List<R> visitMethodsAnnotatedWith(Class<A> annotation, Class<?> clazz, Visitor<A, Method, R> visitor) {
-        List<R> results = new ArrayList<>();
-        for (Method method : clazz.getDeclaredMethods()) {
-            if (method.isAnnotationPresent(annotation)) {
-                R result = visitor.visit(method.getAnnotation(annotation), method);
-                results.add(checkNotNull(result, "Visitor must not return null values!"));
-            }
-        }
-        return results;
-    }
+	public static <A extends Annotation, R> List<R> visitMethodsAnnotatedWith(Class<A> annotation, Class<?> clazz, Visitor<A, Method, R> visitor) {
+		List<R> results = new ArrayList<>();
+		for (Method method : clazz.getDeclaredMethods()) {
+			if (method.isAnnotationPresent(annotation)) {
+				R result = visitor.visit(method.getAnnotation(annotation), method);
+				results.add(checkNotNull(result, "Visitor must not return null values!"));
+			}
+		}
+		return results;
+	}
 }

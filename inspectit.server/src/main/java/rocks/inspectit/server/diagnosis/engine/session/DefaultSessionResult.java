@@ -1,20 +1,60 @@
 package rocks.inspectit.server.diagnosis.engine.session;
 
 import com.google.common.collect.Multimap;
-
+import rocks.inspectit.server.diagnosis.engine.DiagnosisEngine;
+import rocks.inspectit.server.diagnosis.engine.DiagnosisEngineConfiguration;
 import rocks.inspectit.server.diagnosis.engine.rule.ConditionFailure;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
+import rocks.inspectit.server.diagnosis.engine.tag.TagState;
 
 /**
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * Default implementation to represent result of a <code>Session</code>. The {@link DiagnosisEngine} can be configured to produce all kinds of results. If the engine should provide other results an
+ * other {@link ISessionResultCollector} should be provided to the engine.
+ * <pre>
+ *     The DefaultSessionResult provides:
+ *     <ul>
+ *         <li>The original input {@link #input}</li>
+ *         <li>Map of all Tags ({@link #endTags}) of type {@link TagState#LEAF}</li>
+ *          <li>Map of <code>ConditionFailure</code>s ({@link #conditionFailures})</li>
+ *     </ul>
+ * </pre>
+ *
+ * @author Claudio Waldvogel
+ * @see ConditionFailure
+ * @see DiagnosisEngineConfiguration
+ * @see ISessionResultCollector
+ * @see DefaultSessionResultCollector
  */
 public class DefaultSessionResult<I> {
 
+	/**
+	 * The original input value which was passed to {@link DiagnosisEngine#analyze(Object)}.
+	 */
 	private final I input;
 
+	/**
+	 * Map of all <code>ConditionFailure</code> which were discovered while running a diagnosis <code>Session</code>. The index of the map is the name of the rule which produced the
+	 * <code>ConditionFailure</code>.
+	 *
+	 * @see ConditionFailure
+	 */
 	private final Multimap<String, ConditionFailure> conditionFailures;
+
+	/**
+	 * Map of all <code>Tag</code>s which were produced but not consumed. These <code>Tag</code> are considered to be the relevant ones. Those have state {@link TagState#LEAF}
+	 */
 	private final Multimap<String, Tag> endTags;
 
+	/**
+	 * Default Constructor.
+	 *
+	 * @param input
+	 * 		The original input
+	 * @param conditionFailures
+	 * 		Map of <code>ConditionFailure</code>s
+	 * @param endTags
+	 * 		Map of <code>Tag</code>s
+	 */
 	public DefaultSessionResult(I input, Multimap<String, ConditionFailure> conditionFailures, Multimap<String, Tag> endTags) {
 		this.input = input;
 		this.conditionFailures = conditionFailures;

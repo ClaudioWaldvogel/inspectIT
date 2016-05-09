@@ -51,14 +51,14 @@ public class RuleOutput {
 	public RuleOutput(String ruleName, String embeddedTagType, Collection<ConditionFailure> conditionFailures, Collection<Tag> tags) {
 		checkArgument(!Strings.isNullOrEmpty(ruleName), "Rule name must not be empty!");
 		checkArgument(!Strings.isNullOrEmpty(embeddedTagType), "Contained tag type name must not be empty!");
-		this.embeddedTagType = embeddedTagType;
 		this.ruleName = ruleName;
+		this.embeddedTagType = embeddedTagType;
 		this.conditionFailures = checkNotNull(conditionFailures, "Collection must not be empty!");
 		this.tags = checkNotNull(tags, "Collections must not be empty!");
 	}
 
 	// -------------------------------------------------------------
-	// Methods: Convenience
+	// Methods: utils
 	// -------------------------------------------------------------
 
 	/**

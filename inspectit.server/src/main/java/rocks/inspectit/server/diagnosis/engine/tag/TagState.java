@@ -1,9 +1,18 @@
 package rocks.inspectit.server.diagnosis.engine.tag;
 
 /**
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * Represents the state of a {@link Tag}.
+ *
+ * @author Claudio Waldvogel
  */
 public enum TagState {
-    LEAF,
-    PARENT
+	/**
+	 * A {@link Tag} was not used as input to other rules and thus did not act as predecessor for other {@link Tag}s.
+	 */
+	LEAF,
+
+	/**
+	 * The {@link Tag} was consumed by a rule and is predecessor for other {@link Tag}s.
+	 */
+	PARENT
 }

@@ -1,6 +1,7 @@
 package rocks.inspectit.server.diagnosis.engine.rule.store;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import rocks.inspectit.server.diagnosis.engine.rule.RuleOutput;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
@@ -11,14 +12,14 @@ import java.util.*;
 /**
  * The default implementation of {@link IRuleOutputStorage}
  *
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 public class DefaultRuleOutputStorage implements IRuleOutputStorage {
 
 	/**
 	 * The backing Multimap to store all <code>RuleOutput</code>s.
 	 */
-	private final Multimap<String, RuleOutput> allOutputs = ArrayListMultimap.create();
+	private final Multimap<String, RuleOutput> allOutputs = LinkedHashMultimap.create();
 
 	/**
 	 * The backing Multimap to store all <code>RuleOutput</code>s where one or more condition failed.

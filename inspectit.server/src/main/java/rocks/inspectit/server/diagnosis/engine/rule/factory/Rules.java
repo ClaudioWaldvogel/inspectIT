@@ -4,9 +4,8 @@ import com.google.common.collect.Sets;
 import rocks.inspectit.server.diagnosis.engine.rule.*;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.*;
 import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleDefinitionException;
-import rocks.inspectit.server.diagnosis.engine.rule.ConditionFailure;
-import rocks.inspectit.server.diagnosis.engine.rule.RuleOutput;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
+import rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils;
 import rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.*;
 
 import java.lang.reflect.Field;
@@ -48,8 +47,12 @@ public final class Rules {
 		return ruleSet;
 	}
 
-	public static RuleDefinition define(Class<?> clazz) {
+	public static RuleDefinition define(final Class<?> clazz) {
 		checkNotNull(clazz);
+		Rule annotation = ReflectionUtils.findAnnotation(clazz, Rule.class);
+		if (annotation == null) {
+			throw new RuleDefinitionException(clazz.getName() + " must be annotated with @Rule annotation.");
+		}
 		if (!hasNoArgsConstructor(clazz)) {
 			throw new RuleDefinitionException(clazz.getName() + " must define an empty default constructor.");
 		}
@@ -58,13 +61,9 @@ public final class Rules {
 		List<ConditionMethod> conditionMethods = describeConditionMethods(clazz);
 		List<TagInjection> tagInjections = describeTagInjection(clazz);
 		List<SessionVariableInjection> variableInjections = describeSessionParameterInjections(clazz);
+		FireCondition fireCondition = describeFireCondition(annotation, tagInjections);
 
-		Rule rule = findAnnotation(Rule.class, clazz);
-		String name = rule != null ? rule.name() : clazz.getName();
-		String description = rule != null ? rule.description() : RuleDefinition.EMPTY_DESCRIPTION;
-		FireCondition fireCondition = describeFireCondition(rule, tagInjections);
-
-		return new RuleDefinition(name, description, clazz, fireCondition, conditionMethods, actionMethod, tagInjections, variableInjections);
+		return new RuleDefinition(annotation.name(), annotation.description(), clazz, fireCondition, conditionMethods, actionMethod, tagInjections, variableInjections);
 	}
 
 	// -------------------------------------------------------------
@@ -120,6 +119,7 @@ public final class Rules {
 				return new ActionMethod(method, annotation.resultTag(), annotation.resultQuantity());
 			}
 		});
+
 
 		return checkActionMethods(actionMethods);
 	}

@@ -3,10 +3,13 @@ package rocks.inspectit.server.diagnosis.engine.session;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import rocks.inspectit.server.diagnosis.engine.DiagnosisEngineConfiguration;
 import rocks.inspectit.server.diagnosis.engine.rule.RuleDefinition;
 import rocks.inspectit.server.diagnosis.engine.rule.RuleInput;
 import rocks.inspectit.server.diagnosis.engine.rule.RuleOutput;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.SessionVariable;
 import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
+import rocks.inspectit.server.diagnosis.engine.rule.store.DefaultRuleOutputStorage;
 import rocks.inspectit.server.diagnosis.engine.rule.store.IRuleOutputStorage;
 import rocks.inspectit.server.diagnosis.engine.session.exception.SessionException;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
@@ -19,15 +22,42 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.tryInstantiate;
 
 /**
+
+ *
  * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
  */
 public class Session<I, R> implements Callable<R> {
 
-	private static final Logger log = LoggerFactory.getLogger(Session.class);
+	/**
+	 * The slf4j Logger.
+	 */
+	private static final Logger LOG = LoggerFactory.getLogger(Session.class);
+
+	/**
+	 * The current state of this Session. A session can enter 6 states: <p/> NEW, ACTIVATED, PROCESSED, PASSIVATED, DESTROYED, FAILURE
+	 *
+	 * @see State
+	 */
 	private State state = State.NEW;
+
+	/**
+	 * The <code>SessionContext</code> which is associated with this Session. It is created, executed, and destroyed in accordance with the session itself.
+	 */
 	private SessionContext<I> sessionContext;
+
+	/**
+	 * The {@link ExecutorService} executing the rules. The {@link ExecutorService} is configurable from the {@link DiagnosisEngineConfiguration}.
+	 */
 	private ExecutorService executor;
+
+	/**
+	 * The {@link ISessionResultCollector} which produces the results of a session execution. The {@link ISessionResultCollector} is configurable from the {@link DiagnosisEngineConfiguration}.
+	 */
 	private ISessionResultCollector<I, R> resultCollector;
+
+	/**
+	 * Delay to wait until ExecutorService is shut down.
+	 */
 	private int shutDownTimeout;
 
 	// -------------------------------------------------------------
@@ -35,55 +65,135 @@ public class Session<I, R> implements Callable<R> {
 	// -------------------------------------------------------------
 
 	/**
-	 * Private Constructor, Session is always instantiated from the Builder.
+	 * Private Constructor. Access only granted to Builder
 	 */
 	private Session() {
 	}
 
+	/**
+	 * Creates a new {@link Builder} instance. The <code>Builder</code> is the only component which is allowed to create new Session instances.
+	 *
+	 * @param <I>
+	 * 		The input type
+	 * @param <R>
+	 * 		The result type
+	 * @return A new Builder instance
+	 */
 	public static <I, R> Builder<I, R> builder() {
 		return new Builder<>();
 	}
 
+	/**
+	 * Builder to create Sessions.
+	 *
+	 * @param <I>
+	 * 		The input type of the Session
+	 * @param <R>
+	 * 		The result type this Session produces
+	 */
 	public static class Builder<I, R> {
+
+		/**
+		 * Creates a new Builder
+		 */
+		private Builder() {
+		}
+
+		/**
+		 * The amount of threads to executed rules in parallel.
+		 */
 		private int numRuleWorkers = 1;
+
+		/**
+		 * The delay in seconds to await a proper shutdown of the session.
+		 */
 		private int shutDownTimeout = 2;
+
+		/**
+		 * The {@code RuleDefinition}s to be executed.
+		 */
 		private Set<RuleDefinition> ruleDefinitions;
-		private Class<? extends IRuleOutputStorage> storageClass;
-		private ISessionResultCollector<I, R> collector;
 
-		public Builder() {
-		}
+		/**
+		 * The {@link IRuleOutputStorage} implementation to be used.
+		 */
+		private Class<? extends IRuleOutputStorage> storageClass = DefaultRuleOutputStorage.class;
 
-		public Builder<I, R> setNumRuleWorkers(int workers) {
-			this.numRuleWorkers = workers;
+		/**
+		 * The {@link ISessionResultCollector} to be used.
+		 */
+		private ISessionResultCollector<I, R> sessionResultCollector;
+
+		/**
+		 * Sets {@link #numRuleWorkers}.
+		 *
+		 * @param numRuleWorkers
+		 * 		New value for {@link #numRuleWorkers}
+		 * @return The Builder itself
+		 */
+		public Builder<I, R> setNumRuleWorkers(int numRuleWorkers) {
+			this.numRuleWorkers = numRuleWorkers;
 			return this;
 		}
 
-		public Builder<I, R> setStorageClass(Class<? extends IRuleOutputStorage> storageClass) {
-			this.storageClass = storageClass;
-			return this;
-		}
-
+		/**
+		 * Sets {@link #shutDownTimeout}.
+		 *
+		 * @param shutDownTimeout
+		 * 		New value for {@link #shutDownTimeout}
+		 * @return The Builder itself
+		 */
 		public Builder<I, R> setShutDownTimeout(int shutDownTimeout) {
 			this.shutDownTimeout = shutDownTimeout;
 			return this;
 		}
 
+		/**
+		 * Sets {@link #ruleDefinitions}.
+		 *
+		 * @param ruleDefinitions
+		 * 		New value for {@link #ruleDefinitions}
+		 * @return The Builder itself
+		 */
 		public Builder<I, R> setRuleDefinitions(Set<RuleDefinition> ruleDefinitions) {
 			this.ruleDefinitions = ruleDefinitions;
 			return this;
 		}
 
-		public Builder<I, R> setSessionResultCollector(ISessionResultCollector<I, R> collector) {
-			this.collector = collector;
+		/**
+		 * Sets {@link #storageClass}.
+		 *
+		 * @param storageClass
+		 * 		New value for {@link #storageClass}
+		 * @return The Builder itself
+		 */
+		public Builder<I, R> setStorageClass(Class<? extends IRuleOutputStorage> storageClass) {
+			this.storageClass = storageClass;
 			return this;
 		}
 
+		/**
+		 * Sets {@link #sessionResultCollector}.
+		 *
+		 * @param sessionResultCollector
+		 * 		New value for {@link #sessionResultCollector}
+		 * @return The Builder itself
+		 */
+		public Builder<I, R> setSessionResultCollector(ISessionResultCollector<I, R> sessionResultCollector) {
+			this.sessionResultCollector = sessionResultCollector;
+			return this;
+		}
+
+		/**
+		 * Constructs the session.
+		 *
+		 * @return A new session instance
+		 */
 		public Session<I, R> build() {
 			// sanity checks
 			checkNotNull(ruleDefinitions);
 			checkNotNull(storageClass);
-			checkNotNull(collector);
+			checkNotNull(sessionResultCollector);
 			numRuleWorkers = numRuleWorkers > 0 ? numRuleWorkers : 1;
 			shutDownTimeout = shutDownTimeout >= 2 ? shutDownTimeout : 2;
 
@@ -91,8 +201,9 @@ public class Session<I, R> implements Callable<R> {
 			Session<I, R> session = new Session<>();
 			session.executor = Executors.newFixedThreadPool(numRuleWorkers);
 			session.shutDownTimeout = shutDownTimeout;
+			//Create a new SessionContext and instantiate the IRuleOutputStorage
 			session.sessionContext = new SessionContext<>(ruleDefinitions, tryInstantiate(storageClass));
-			session.resultCollector = collector;
+			session.resultCollector = sessionResultCollector;
 			return session;
 		}
 	}
@@ -103,18 +214,44 @@ public class Session<I, R> implements Callable<R> {
 
 	@Override
 	public R call() throws Exception {
+		//Processes and collect results.
+		//If a Session is used as Callable this call might horribly fail if sessions are not retrieved from SessionPool and a sessions lifeCycle is neglected. But we have not chance to activate a
+		// session internally  due to missing input information. So simply fail
 		return process().collectResults();
 	}
 
 	// -------------------------------------------------------------
 	// Methods: LifeCycle -> reflects the life cycle of a
-	// org.apache.commons.pool2.PooledObject
+	// org.apache.commons.pool.impl.GenericObjectPool
 	// -------------------------------------------------------------
 
+	/**
+	 * Tries to activate the Session for the given input. Activation means that state is changes to ACTIVATED and SessionContext is activated as well. If a session depends on {@link SessionVariables}
+	 * use {@link #activate(Object, SessionVariables)}. Activation is only possible if the session is currently in NEW or PASSIVATED state, any other state forces a SessionException.
+	 *
+	 * @param input
+	 * 		The input to be processed.
+	 * @return The Session itself
+	 * @see SessionException
+	 */
 	public Session<I, R> activate(I input) {
 		return activate(input, new SessionVariables());
 	}
 
+	/**
+	 * Tries to activate the Session for the given input object and SessionVariables. Activation means that state is changes to ACTIVATED and SessionContext is activated as well. Activation is only
+	 * possible if the session is currently in NEW or PASSIVATED state, any other state forces a SessionException.
+	 *
+	 * @param input
+	 * 		The input to be processed.
+	 * @param variables
+	 * 		The SessionVariables to be used
+	 * @return The Session itself
+	 * @throws SessionException
+	 * @see SessionVariables
+	 * @see SessionVariable
+	 * @see SessionException
+	 */
 	public Session<I, R> activate(I input, SessionVariables variables) {
 		switch (state) {
 		case NEW:
@@ -124,14 +261,22 @@ public class Session<I, R> implements Callable<R> {
 			state = State.ACTIVATED;
 			break;
 		case DESTROYED:
-			throw new IllegalStateException("Session already destroyed.");
+			throw new SessionException("Session already destroyed.");
 		case FAILURE:
 		default:
-			throw new IllegalStateException("Session can not enter ACTIVATED stated from: " + state + " state. Ensure Session is in NEW or PASSIVATED state when activating.");
+			throw new SessionException("Session can not enter ACTIVATED stated from: " + state + " state. Ensure Session is in NEW or PASSIVATED state when activating.");
 		}
 		return this;
 	}
 
+	/**
+	 * Executes the Session. Invocation is exclusively possible if <code>Session</code> is in ACTIVATED state, any other state forces a <code>SessionException</code>. Processing is enabled be
+	 * inserting a initial RuleOutput to the {@link IRuleOutputStorage} which will act as input to further rules. If processing completes without errors the <code>Session</code> enters PROCESSED
+	 * state. In any case of error it enters FAILURE state.
+	 *
+	 * @return The Session itself
+	 * @throws SessionException
+	 */
 	public Session<I, R> process() {
 		switch (state) {
 		case ACTIVATED:
@@ -139,35 +284,35 @@ public class Session<I, R> implements Callable<R> {
 			doProcess();
 			state = State.PROCESSED;
 			break;
-		case FAILURE:
 		default:
-			throw new IllegalStateException("Session can not enter process stated from: " + state + "state. Ensure that Session is in ACTIVATED state before processing.");
+			throw new SessionException("Session can not enter process stated from: " + state + "state. Ensure that Session is in ACTIVATED state before processing.");
 		}
 		return this;
 	}
 
+	/**
+	 * Cleans the <code>Session</code> by means of cleaning the <code>SessionContext</code> and removing all stale data. Valid transitions to PASSIVATED state are from PROCESSED and Failure.
+	 *
+	 * @return The Session itself/
+	 */
 	public Session<I, R> passivate() {
-		switch (state) {
-		case PROCESSED:
-		case FAILURE:
-			sessionContext.passivate();
-			state = State.PASSIVATED;
-			break;
-		case ACTIVATED:
-			log.warn("Session gets passivated but was not yet processed.");
-			break;
-		case DESTROYED:
-			log.warn("Session gets passivated but was already destroyed.");
-			break;
-		default:
-			throw new IllegalStateException("Session can not enter PASSIVATED stated from: " + state + "state. Ensure that Session is in PROCESSED state before it gets passivated.");
+		if (!state.equals(State.PROCESSED)) {
+			LOG.warn("Not processed Session gets passivated!");
 		}
+		//Passivate is always possible. Also it is important to passivate the Session in any case. This ensures a reusable clean Session.
+		sessionContext.passivate();
+		state = State.PASSIVATED;
 		return this;
 	}
 
+	/**
+	 * Destroys this session. If the session was not yet passivated, it will be passivated in advance. While the session is destroyed, the ExecutorService is shutdown and the SessionContext is
+	 * destroyed. After the session is destroyed it is unusable!
+	 *
+	 * @return The Session itself
+	 */
 	public Session<I, R> destroy() {
 		switch (state) {
-		case FAILURE:
 		case PROCESSED:
 			// We can destroy the session but it was not yet passivated. To stay in sync with the
 			// state lifeCycle we passivate first
@@ -179,12 +324,12 @@ public class Session<I, R> implements Callable<R> {
 			break;
 		case NEW:
 		case ACTIVATED:
-			log.warn("Session is destroy before it was processed.");
+			LOG.warn("Session is destroy before it was processed.");
 		default:
 			try {
 				executor.shutdown();
 				if (!executor.awaitTermination(shutDownTimeout, TimeUnit.SECONDS)) {
-					log.error("Session Executor did not shut down within: {} seconds.", shutDownTimeout);
+					LOG.error("Session Executor did not shut down within: {} seconds.", shutDownTimeout);
 				}
 			} catch (InterruptedException e) {
 				throw new SessionException("Failed to destroy Session", e);
@@ -199,59 +344,117 @@ public class Session<I, R> implements Callable<R> {
 		return this;
 	}
 
+	/**
+	 * Marks the session as failed and passivates it.
+	 *
+	 * @param cause
+	 * 		The root cause of failure.
+	 * @throws SessionException
+	 */
+	private void failure(Exception cause) {
+		//enter failure state
+		state = State.FAILURE;
+		//ensure that Session gets passivated to enable reuse
+		passivate();
+		//Propagate the cause of failure
+		throw new SessionException("Diagnosis Session failed with error(s)", cause);
+	}
+
+	/**
+	 * Starts collecting all gathered results. The result collection process is delegated to the {@link ISessionResultCollector}.
+	 *
+	 * @return Depends on the {@link ISessionResultCollector} implementation.
+	 */
 	public R collectResults() {
 		return resultCollector.collect(sessionContext);
+	}
+
+	/**
+	 * Gets {@link #state}.
+	 *
+	 * @return {@link #state}
+	 */
+	State getState() {
+		return state;
+	}
+
+	/**
+	 * Gets {@link #sessionContext}.
+	 *
+	 * @return {@link #sessionContext}
+	 */
+	SessionContext<I> getSessionContext() {
+		return sessionContext;
 	}
 
 	// -------------------------------------------------------------
 	// Methods: Internals
 	// -------------------------------------------------------------
 
+	/**
+	 * Internal processing routine to execute all rules. This methods blocks as long as further rules can be executed. If this method returns it is assured that all possible rules are executed and
+	 * all
+	 * possible results are available in the IRuleOutputStorage.
+	 */
 	private void doProcess() {
-		Set<Execution> nextRules = findNextRules();
+		Collection<RuleExecution> nextRules = findNextRules();
 		while (nextRules.size() > 0) {
 			try {
+				//1. invoke next set of rules
 				List<Future<Collection<RuleOutput>>> futures = executor.invokeAll(nextRules);
+				//2. iterate over all created futures
 				for (Future<Collection<RuleOutput>> future : futures) {
 					try {
-						// store latest results in storage.
-						// The insertion waits till the future returns
-						sessionContext.getStorage().store(future.get());
+						//3. block till a of RuleOutputs is received
+						Collection<RuleOutput> outputs = future.get();
+						//4. store outputs in IRuleOutputStorage
+						sessionContext.getStorage().store(outputs);
 					} catch (Exception ex) {
-						handleFailure(ex);
+						//ensure a proper exception handling
+						failure(ex);
 					}
 				}
 			} catch (InterruptedException ex) {
 				throw new SessionException("Failed to retrieve RuleOutput", ex);
 			}
+			//Fetch the next executable rules
 			nextRules = findNextRules();
 		}
 	}
 
-	private void handleFailure(Exception cause) {
-		//enter failure state
-		state = State.FAILURE;
-		//ensure that Session gets passivated to ensure a proper state to reuse this session instance
-		passivate();
-		//Propagate the cause of failure
-		throw new SessionException("Diagnosis Session failed with error(s)", cause);
-	}
-
-	private Set<Execution> findNextRules() {
+	/**
+	 * Utility method to determine the next executable rules. The next rules are determined by comparing all, so far collected, types of tags in <code>IRuleOutputStorage</code> and the
+	 * <code>FireCondition</code> of each <code>RuleDefinition</code>.
+	 *
+	 * @return Collection of <code>RuleExecution</code>s.
+	 * @see rocks.inspectit.server.diagnosis.engine.rule.FireCondition
+	 * @see RuleDefinition
+	 * @see IRuleOutputStorage
+	 */
+	private Collection<RuleExecution> findNextRules() {
 		Set<String> available = sessionContext.getStorage().getAvailableTagTypes();
-		Set<Execution> nextRules = new HashSet<>();
+		Set<RuleExecution> nextRules = new HashSet<>();
 		Iterator<RuleDefinition> iterator = sessionContext.getRuleSet().iterator();
 		while (iterator.hasNext()) {
 			RuleDefinition rule = iterator.next();
 			if (rule.getFireCondition().canFire(available)) {
 				// wrap RuleDefinition in a callable object to be used with ExecutorService
-				nextRules.add(new Execution(rule));
+				nextRules.add(new RuleExecution(rule));
 				iterator.remove();
 			}
 		}
 		return nextRules;
 	}
 
+	/**
+	 * Collects all available inputs for a single code>RuleDefinition</code>. Each RuleInput is equivalent to an execution of the RuleInput.
+	 *
+	 * @param definition
+	 * 		The <code>RuleDefinition</code> to be executed.
+	 * @return A Collection of RuleInputs
+	 * @see RuleInput
+	 * @see RuleDefinition
+	 */
 	private Collection<RuleInput> collectInputs(RuleDefinition definition) {
 		Set<String> requiredInputTags = definition.getFireCondition().getTagTypes();
 		Collection<RuleOutput> leafOutputs = sessionContext.getStorage().findLeafsByTags(requiredInputTags);
@@ -264,7 +467,7 @@ public class Session<I, R> implements Callable<R> {
 			for (Tag leafTag : output.getTags()) {
 				Collection<Tag> tags = Tags.unwrap(leafTag, requiredInputTags);
 				if (tags.size() != requiredInputTags.size()) {
-					log.warn("Invalid Value definitions for {}. All values must be reachable from the latest Tag " + "value.", definition.getName());
+					LOG.warn("Invalid Value definitions for {}. All values must be reachable from the latest Tag " + "value.", definition.getName());
 				} else {
 					// Create and store a new RuleInput
 					inputs.add(new RuleInput(leafTag, tags));
@@ -278,13 +481,29 @@ public class Session<I, R> implements Callable<R> {
 	// Inner classes
 	// -------------------------------------------------------------
 
-	private class Execution implements Callable<Collection<RuleOutput>> {
+	/**
+	 * Utility class to wrap {@link RuleDefinition#execute(RuleInput, SessionVariables)} into a <code>Callable</code>.
+	 */
+	private class RuleExecution implements Callable<Collection<RuleOutput>> {
 
+		/**
+		 * The {@link RuleDefinition} to be executed}.
+		 */
 		private final RuleDefinition definition;
 
-		public Execution(RuleDefinition definition) {
+		/**
+		 * Default Constructor
+		 *
+		 * @param definition
+		 * 		{@link RuleDefinition} to be executed}.
+		 */
+		public RuleExecution(RuleDefinition definition) {
 			this.definition = definition;
 		}
+
+		//-------------------------------------------------------------
+		// Interface Implementation: Callable
+		//-------------------------------------------------------------
 
 		@Override
 		public Collection<RuleOutput> call() throws Exception {
@@ -292,7 +511,10 @@ public class Session<I, R> implements Callable<R> {
 		}
 	}
 
-	private enum State {
+	/**
+	 * Internal enum representing the current state of this session.
+	 */
+	enum State {
 		/**
 		 * The initial State of each Session.
 		 */
@@ -323,5 +545,4 @@ public class Session<I, R> implements Callable<R> {
 		 */
 		FAILURE
 	}
-
 }

@@ -4,17 +4,19 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
 import com.google.common.base.Strings;
+import rocks.inspectit.server.diagnosis.engine.rule.annotation.SessionVariable;
 import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleExecutionException;
+import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
 
 import java.lang.reflect.Field;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
- * FieldInjection implementation to inject session variables. Each SessionVariableInjection reflects a {@link rocks.inspectit.server.diagnosis.engine.rule.annotation.SessionVariable} annotation.
+ * FieldInjection implementation to inject session variables. Each SessionVariableInjection reflects a {@link SessionVariable} annotation.
  *
  * @author Claudio Waldvogel
- * @see rocks.inspectit.server.diagnosis.engine.session.SessionVariables
+ * @see SessionVariables
  */
 public class SessionVariableInjection extends FieldInjection {
 

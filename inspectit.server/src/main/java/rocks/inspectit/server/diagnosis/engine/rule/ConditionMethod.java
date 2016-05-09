@@ -1,10 +1,10 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
-import com.google.common.base.Strings;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.util.ReflectionUtils;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Condition;
 import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleExecutionException;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -57,7 +57,7 @@ public class ConditionMethod {
 	 */
 	public ConditionMethod(String name, String hint, Method method) {
 		this.method = checkNotNull(method);
-		this.name = fixName(name, this.method.getName());
+		this.name = StringUtils.defaultIfEmpty(name, this.method.getName());
 		this.hint = hint;
 	}
 
@@ -72,15 +72,15 @@ public class ConditionMethod {
 	 */
 	public ConditionFailure execute(ExecutionContext context) {
 		try {
-			boolean valid = (boolean) getMethod().invoke(context.getInstance());
+			boolean valid = (boolean) ReflectionUtils.invokeMethod(getMethod(), context.getInstance());
 			if (!valid) {
 				// Store information about the failed condition for later usage
 				return new ConditionFailure(getName(), getHint());
 			}
-		} catch (InvocationTargetException | IllegalAccessException e) {
+			return null;
+		} catch (Exception e) {
 			throw new RuleExecutionException("Invocation of condition method failed.", context, e);
 		}
-		return null;
 	}
 
 	// -------------------------------------------------------------
@@ -112,31 +112,6 @@ public class ConditionMethod {
 	 */
 	public Method getMethod() {
 		return method;
-	}
-
-	//-------------------------------------------------------------
-	// Methods: internals
-	//-------------------------------------------------------------
-
-	/**
-	 * Utility method to ensure a valid condition name.
-	 *
-	 * @param name
-	 * 		The preferred name
-	 * @param alternative
-	 * 		An alternative name
-	 * @return A not empty, not null String
-	 * @throws IllegalArgumentException if both Strings or null or empty
-	 */
-	private String fixName(String name, String alternative) {
-		if (Strings.isNullOrEmpty(name)) {
-			if (Strings.isNullOrEmpty(alternative)) {
-				throw new IllegalArgumentException("Alternative must not be null or empty.");
-			}
-			return alternative;
-		} else {
-			return name;
-		}
 	}
 
 	// -------------------------------------------------------------

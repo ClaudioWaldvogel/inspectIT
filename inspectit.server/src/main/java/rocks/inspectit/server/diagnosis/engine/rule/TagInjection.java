@@ -18,7 +18,7 @@ import static rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue.I
 public class TagInjection extends FieldInjection {
 
 	/**
-	 * The type if tag to be injected.
+	 * The type of tag to be injected.
 	 */
 	private final String type;
 
