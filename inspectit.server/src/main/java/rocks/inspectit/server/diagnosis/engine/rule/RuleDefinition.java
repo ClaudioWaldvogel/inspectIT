@@ -16,7 +16,7 @@ import static rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.tryIn
 /**
  * A <code>RuleDefinition</code> is an abstracted and generalized view of a rule implementation. Each rule implementation which is passed to the {@link
  * rocks.inspectit.server.diagnosis.engine.DiagnosisEngine} is converted in a <code>RuleDefinition</code>.
- * <p/>
+ * <p>
  * <pre>
  *  A <code>RuleDefinition</code> summarizes
  *  <ul>

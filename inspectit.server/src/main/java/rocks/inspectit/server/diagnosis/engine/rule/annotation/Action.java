@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation marks the actual executing method of a rule implementation. <b> Be aware that a rule can define only one action method.</b>
- * <p/>
+ * <p>
  * <pre>
  *     {@code
  *   	@literal @Action(resultTag = "SomeTag", resultQuantity = SINGLE)
@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
  *     }
  * </pre>
  *
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

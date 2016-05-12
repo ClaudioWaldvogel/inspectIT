@@ -109,7 +109,7 @@ public class Tags {
 	 * @param parentTypes
 	 * 		The requested  parentsTypes
 	 * @return A collection of <code>Tag</code>.
-	 * <p/>
+	 * <p>
 	 * <pre>
 	 *    The collection contains:
 	 *    <ul>

@@ -8,7 +8,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 /**
  * Provides information about a failed condition.
  *
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 public class ConditionFailure {
 

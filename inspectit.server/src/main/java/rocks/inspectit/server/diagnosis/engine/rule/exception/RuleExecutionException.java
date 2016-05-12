@@ -5,7 +5,7 @@ import rocks.inspectit.server.diagnosis.engine.rule.ExecutionContext;
 /**
  * Exception is raised if the execution of a rule fails
  *
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 public class RuleExecutionException extends RuntimeException {
 

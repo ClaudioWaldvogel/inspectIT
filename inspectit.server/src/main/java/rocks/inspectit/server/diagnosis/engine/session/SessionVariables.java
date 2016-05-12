@@ -14,5 +14,4 @@ public class SessionVariables extends HashMap<String, Object> {
 	 */
 	public SessionVariables() {
 	}
-
 }

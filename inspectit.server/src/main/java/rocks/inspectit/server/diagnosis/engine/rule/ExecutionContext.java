@@ -42,7 +42,7 @@ public class ExecutionContext {
 
 	/**
 	 * TODO Check if SessionVariables should be nested in RuleInput
-	 * <p/>
+	 * <p>
 	 * Container providing all the session variables.
 	 *
 	 * @see SessionVariables

@@ -5,7 +5,7 @@ package rocks.inspectit.server.diagnosis.engine.session;
  *
  * @param <R>
  * 		The type of result to be handled
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 public interface ISessionCallback<R> {
 

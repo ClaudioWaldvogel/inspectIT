@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Represents the action method of a rule. An <code>ActionMethod</code> reflects the {@link Action} annotation.
  *
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  * @see Action
  */
 public class ActionMethod {

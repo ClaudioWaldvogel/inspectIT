@@ -3,7 +3,7 @@ package rocks.inspectit.server.diagnosis.engine.rule.exception;
 /**
  * Exception is raised if an invalid {@link rocks.inspectit.server.diagnosis.engine.rule.RuleDefinition} is detected.
  *
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 public class RuleDefinitionException extends RuntimeException {
 

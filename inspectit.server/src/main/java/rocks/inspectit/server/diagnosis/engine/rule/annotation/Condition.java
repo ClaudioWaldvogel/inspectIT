@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * Annotation marks a method as a runtime condition for a rule. A rule can define several condition methods. If one condition fails, the rule will not be executed. At the time the condition method is
  * invoked, the rule is already ready for action in means of all {@link TagValue} and {@link SessionVariable} annotations are already processed and the corresponding values are available.
- * <p/>
+ * <p>
  *
  * <pre>
  * {@code
@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  *
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

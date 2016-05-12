@@ -1,17 +1,28 @@
 package rocks.inspectit.server.diagnosis.engine;
 
 /**
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * Umbrella exception for failures in the engine.
+ *
+ * @author Claudio Waldvogel
  */
 public class DiagnosisEngineException extends RuntimeException {
 
-	private static final long serialVersionUID = 8461985903909289169L;
+    /**
+     * Default constructor to create a new exception.
+     *
+     * @param message The error message.
+     */
+    public DiagnosisEngineException(String message) {
+        super(message);
+    }
 
-	public DiagnosisEngineException(String message) {
-		super(message);
-	}
-
-	public DiagnosisEngineException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    /**
+     * Constructor to create a new exception with embedded root cause.
+     *
+     * @param message The error message.
+     * @param cause   The root cause
+     */
+    public DiagnosisEngineException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

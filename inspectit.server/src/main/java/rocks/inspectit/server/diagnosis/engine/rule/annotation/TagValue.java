@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  *
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  * @see InjectionStrategy
  */
 @Retention(RetentionPolicy.RUNTIME)

@@ -3,52 +3,80 @@ package rocks.inspectit.server.diagnosis.engine.session;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import rocks.inspectit.server.diagnosis.engine.DiagnosisEngine;
 import rocks.inspectit.server.diagnosis.engine.DiagnosisEngineConfiguration;
+import rocks.inspectit.server.diagnosis.engine.rule.RuleDefinition;
+import rocks.inspectit.server.diagnosis.engine.rule.factory.Rules;
+
+import java.util.Set;
 
 /**
  * BasePoolableObjectFactory implementation to create poolable {@link Session} instances. SessionFactory is used by {@link SessionPool}.
  *
+ * @param <I> The session input type
+ * @param <R> The expected output type
  * @author Claudio Waldvogel
  * @see BasePoolableObjectFactory
  * @see SessionPool
  */
 public class SessionFactory<I, R> extends BasePoolableObjectFactory<Session<I, R>> {
 
-	/**
-	 * The top-level {@link DiagnosisEngineConfiguration} configuration. Ths configuration might be used to configuration the factory.
-	 *
-	 * @see DiagnosisEngineConfiguration
-	 * @see DiagnosisEngine
-	 */
-	private final DiagnosisEngineConfiguration<I, R> configuration;
+    /**
+     * The top-level {@link DiagnosisEngineConfiguration} configuration. Ths configuration might be used to configuration the factory.
+     *
+     * @see DiagnosisEngineConfiguration
+     * @see DiagnosisEngine
+     */
+    private final DiagnosisEngineConfiguration<I, R> configuration;
 
-	/**
-	 * Default constructor to create new {@link SessionFactory}s
-	 *
-	 * @param configuration
-	 * 		The {@link DiagnosisEngineConfiguration}
-	 */
-	public SessionFactory(DiagnosisEngineConfiguration<I, R> configuration) {
-		this.configuration = configuration;
-	}
+    /**
+     * All {@link RuleDefinition} to be passed to the {@link Session}s. The definitions are extracted from {@link DiagnosisEngineConfiguration#ruleClasses}.
+     */
+    private Set<RuleDefinition> ruleDefinitions;
 
-	//-------------------------------------------------------------
-	// Interface Implementation: BasePoolableObjectFactory
-	//-------------------------------------------------------------
+    /**
+     * Default constructor to create new {@link SessionFactory}s
+     *
+     * @param configuration The {@link DiagnosisEngineConfiguration}
+     */
+    public SessionFactory(DiagnosisEngineConfiguration<I, R> configuration) {
+        this.configuration = configuration;
+        this.ruleDefinitions = prepareRuleDefinitions(configuration.getRuleClasses());
+    }
 
-	@Override
-	public Session<I, R> makeObject() throws Exception {
-		//Utilize Session#Builder to create a new Session. Session is configured with values from the the DiagnosisEngineConfiguration.
-		return Session.<I, R>builder().setNumRuleWorkers(configuration.getNumRuleWorkers()).setStorageClass(configuration.getStorageClass()).setRuleDefinitions(configuration.getRuleDefinitions())
-				.setSessionResultCollector(configuration.getResultCollector()).build();
-	}
+    //-------------------------------------------------------------
+    // Interface Implementation: BasePoolableObjectFactory
+    //-------------------------------------------------------------
 
-	@Override
-	public void passivateObject(Session<I, R> session) throws Exception {
-		session.passivate();
-	}
+    @Override
+    public Session<I, R> makeObject() throws Exception {
+        //Utilize Session#Builder to create a new Session. Session is configured with values from the the DiagnosisEngineConfiguration.
+        return Session.<I, R>builder()
+                .setNumRuleWorkers(configuration.getNumRuleWorkers())
+                .setStorageClass(configuration.getStorageClass())
+                .setRuleDefinitions(ruleDefinitions)
+                .setSessionResultCollector(configuration.getResultCollector()).build();
+    }
 
-	@Override
-	public void destroyObject(Session<I, R> session) throws Exception {
-		session.destroy();
-	}
+    @Override
+    public void passivateObject(Session<I, R> session) throws Exception {
+        session.passivate();
+    }
+
+    @Override
+    public void destroyObject(Session<I, R> session) throws Exception {
+        session.destroy();
+    }
+
+    //-------------------------------------------------------------
+    // Methods: Internals
+    //-------------------------------------------------------------
+
+    /**
+     * Internal method to transform classes implementing a rule into {@link RuleDefinition}s.
+     *
+     * @param ruleClasses The classes to be transformed.
+     * @return Set of {@link RuleDefinition}s.
+     */
+    private Set<RuleDefinition> prepareRuleDefinitions(Set<Class<?>> ruleClasses) {
+        return Rules.define(ruleClasses);
+    }
 }

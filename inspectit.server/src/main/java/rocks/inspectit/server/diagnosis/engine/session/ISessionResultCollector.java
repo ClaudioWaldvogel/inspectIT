@@ -8,13 +8,13 @@ package rocks.inspectit.server.diagnosis.engine.session;
  * 		The type of input the <code>Session</code> processed
  * @param <R>
  * 		The type of result this <code>ISessionResultCollector</code> produces
- * @author Claudio Waldvogel (claudio.waldvogel@novatec-gmbh.de)
+ * @author Claudio Waldvogel
  */
 public interface ISessionResultCollector<I, R> {
 
 	/**
 	 * Collects all results from <code>SessionContext</code>. It is intended to collect anything and produce anything.
-	 * <p/>
+	 * <p>
 	 * <strong>Be aware that one must no hold a reference to the SessionContext!!. SessionContext will be destroyed as soon as results are collected. Thus, values will be unavailable and
 	 * lost!</strong>
 	 *
