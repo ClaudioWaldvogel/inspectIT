@@ -42,9 +42,8 @@ public abstract class FieldInjection {
 	 *
 	 * @param context
 	 *            The current valid <code>ExecutionContext</code>
-	 * @throws RuleExecutionException
-	 *             if the injection fails
 	 * @see ExecutionContext
+	 * Throws: RuleExecutionException if an exception soccurs
 	 */
 	public void execute(ExecutionContext context) {
 		Object toInject = determineValueToInject(context);

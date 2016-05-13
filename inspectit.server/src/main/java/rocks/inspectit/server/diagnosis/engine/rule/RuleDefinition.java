@@ -1,7 +1,12 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.tryInstantiate;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
+import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,15 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
-import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
-import rocks.inspectit.server.diagnosis.engine.tag.Tag;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static rocks.inspectit.server.diagnosis.engine.util.ReflectionUtils.tryInstantiate;
 
 /**
  * A <code>RuleDefinition</code> is an abstracted and generalized view of a rule implementation.
@@ -25,7 +23,7 @@ import rocks.inspectit.server.diagnosis.engine.tag.Tag;
  * {@link rocks.inspectit.server.diagnosis.engine.DiagnosisEngine} is converted in a
  * <code>RuleDefinition</code>.
  * <p>
- *
+ * <p>
  * <pre>
  *  A <code>RuleDefinition</code> summarizes
  *  <ul>
@@ -50,7 +48,7 @@ public class RuleDefinition {
 	/**
 	 * The default description of a rule.
 	 */
-	public static final String EMPTY_DESCRIPTION = "EMPTY";
+	private static final String EMPTY_DESCRIPTION = "EMPTY";
 
 	/**
 	 * The name of this rule.
@@ -103,24 +101,20 @@ public class RuleDefinition {
 	/**
 	 * Default constructor.
 	 *
-	 * @param name
-	 *            The name of this rule. Must not be null.
-	 * @param description
-	 *            The description of this rule. Must not be null.
-	 * @param implementation
-	 *            The backing rule implementation. Must not be null.
-	 * @param fireCondition
-	 *            The FireCondition of this rule. Must not be null.
-	 * @param conditionMethods
-	 *            The ConditionMethod of this rule. Must not be null.
-	 * @param actionMethod
-	 *            The actionMethod of this rule. Must not be null.
-	 * @param tagInjections
-	 *            The TagInjections of this rule. Must not be null.
-	 * @param variableInjections
-	 *            the SessionVariableInjections of this rule. Must not be null.
+	 * @param name               The name of this rule. Must not be null.
+	 * @param description        The description of this rule. Must not be null.
+	 * @param implementation     The backing rule implementation. Must not be null.
+	 * @param fireCondition      The FireCondition of this rule. Must not be null.
+	 * @param conditionMethods   The ConditionMethod of this rule. Must not be null.
+	 * @param actionMethod       The actionMethod of this rule. Must not be null.
+	 * @param tagInjections      The TagInjections of this rule. Must not be null.
+	 * @param variableInjections the SessionVariableInjections of this rule. Must not be null.
 	 */
-	@SuppressWarnings("checkstyle:ParameterNumberCheck")
+	//Ignore checkstyle warning that constructor has more than 7 parameters.
+	//To ensure immutablity we need this constructor or provided some kind of builder.
+	//Needs to be discussed?
+	//@SuppressWarnings("checkstyle:ParameterNumberCheck"), @SuppressWarnings("parameternumber")  has no effect.
+	@SuppressWarnings("all")
 	public RuleDefinition(String name, String description, Class<?> implementation, FireCondition fireCondition, List<ConditionMethod> conditionMethods, ActionMethod actionMethod,
 			List<TagInjection> tagInjections, List<SessionVariableInjection> variableInjections) {
 		this.implementation = checkNotNull(implementation);
@@ -140,7 +134,7 @@ public class RuleDefinition {
 	/**
 	 * Executes this <code>RuleDefinition</code> in 6 steps.
 	 * <p/>
-	 *
+	 * <p>
 	 * <pre>
 	 * 1. The raw class which implements this <code>RuleDefinition</code> is instantiated and wrapped in a new <code>ExecutionContext</code>.
 	 * 2. All <code>TagInjection</code>s are executed.
@@ -150,10 +144,8 @@ public class RuleDefinition {
 	 * 6. A new <code>RuleOutput</code> is created and returned
 	 * </pre>
 	 *
-	 * @param input
-	 *            The <code>RuleInput</code> to be processed. Must not null.
-	 * @param variables
-	 *            The <code>SessionVariables</code>. Must not null.
+	 * @param input     The <code>RuleInput</code> to be processed. Must not null.
+	 * @param variables The <code>SessionVariables</code>. Must not null.
 	 * @return A new <code>RuleOutput</code>
 	 * @throws RuntimeException
 	 * @see ExecutionContext
@@ -199,14 +191,12 @@ public class RuleDefinition {
 
 	/**
 	 * Convenience method to execute this <code>RuleDefinition</code> for several
-	 * <code>RuleInput</code>s. The amount of <code>RuleInput</code>s equals the amount of
+	 * <code>RuleInput</code>s. The amount of <code>R@uleInput</code>s equals the amount of
 	 * executions of this <code>RuleDefinition</code>. Each <code>RuleInput</code> concludes in a
 	 * invocation of {@link #execute(RuleInput, SessionVariables)}.
 	 *
-	 * @param inputs
-	 *            A collection of <code>RuleInput</code> to be processed.
-	 * @param variables
-	 *            The <code>SessionVariables</code>
+	 * @param inputs    A collection of <code>RuleInput</code> to be processed.
+	 * @param variables The <code>SessionVariables</code>
 	 * @return A collection of <code>RuleOutput</code>s.
 	 * @see RuleInput
 	 * @see RuleOutput

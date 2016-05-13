@@ -88,7 +88,7 @@ public final class ReflectionUtils {
 	 * Checks if given class is annotation with a certain annotation.
 	 *
 	 * @param clazz
-	 *            The clazz to be checked.
+	 *            The class to be checked.
 	 * @param annotationClass
 	 *            The annotation to be looked up.
 	 * @param <T>
