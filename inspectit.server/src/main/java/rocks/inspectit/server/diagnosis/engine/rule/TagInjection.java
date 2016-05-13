@@ -1,17 +1,19 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
+import static rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue.InjectionStrategy.BY_VALUE;
+
+import java.lang.reflect.Field;
+
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue.InjectionStrategy;
 import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleExecutionException;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 
-import java.lang.reflect.Field;
-
-import static rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue.InjectionStrategy.BY_VALUE;
-
 /**
- * FieldInjection implementation to inject <code>Tag</code>s, respectively the value of a <code>Tag</code>.
+ * FieldInjection implementation to inject <code>Tag</code>s, respectively the value of a
+ * <code>Tag</code>.
  *
  * @author Claudio Waldvogel
  */
@@ -30,26 +32,26 @@ public class TagInjection extends FieldInjection {
 	private final InjectionStrategy injectionStrategy;
 
 	/**
-	 * Default Constructor
+	 * Default Constructor.
 	 *
 	 * @param type
-	 * 		The type of <code>Tag</code> to be injected
+	 *            The type of <code>Tag</code> to be injected
 	 * @param injectee
-	 * 		The injectee field
+	 *            The injectee field
 	 */
 	public TagInjection(String type, Field injectee) {
 		this(type, injectee, BY_VALUE);
 	}
 
 	/**
-	 * Constructor to define a InjectionStrategy
+	 * Constructor to define a InjectionStrategy.
 	 *
 	 * @param type
-	 * 		The type of <code>Tag</code> to be injected
+	 *            The type of <code>Tag</code> to be injected
 	 * @param injectee
-	 * 		The injectee field
+	 *            The injectee field
 	 * @param injectionStrategy
-	 * 		The <code>InjectionStrategy</code>
+	 *            The <code>InjectionStrategy</code>
 	 * @see InjectionStrategy
 	 */
 	public TagInjection(String type, Field injectee, InjectionStrategy injectionStrategy) {
@@ -63,7 +65,7 @@ public class TagInjection extends FieldInjection {
 	 */
 	@Override
 	public Object determineValueToInject(ExecutionContext context) {
-		//extract the required type form the unraveled list of input Tags
+		// extract the required type form the unraveled list of input Tags
 		for (Tag tag : context.getRuleInput().getUnraveled()) {
 			if (tag.getType().equals(getType())) {
 				return getInjectionStrategy().equals(BY_VALUE) ? tag.getValue() : tag;
@@ -108,11 +110,13 @@ public class TagInjection extends FieldInjection {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
+		if (this == o) {
 			return true;
+		}
 
-		if (o == null || getClass() != o.getClass())
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 
 		TagInjection that = (TagInjection) o;
 

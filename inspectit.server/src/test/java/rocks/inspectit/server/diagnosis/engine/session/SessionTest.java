@@ -3,9 +3,12 @@
  */
 package rocks.inspectit.server.diagnosis.engine.session;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import rocks.inspectit.server.diagnosis.engine.DiagnosisEngineConfiguration;
+
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Action;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Condition;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Rule;
@@ -15,100 +18,93 @@ import rocks.inspectit.server.diagnosis.engine.session.exception.SessionExceptio
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 import rocks.inspectit.shared.all.testbase.TestBase;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-
 /**
  * @author Claudio Waldvogel
  */
+@SuppressWarnings("all")
 public class SessionTest extends TestBase {
 
-    Session<String, DefaultSessionResult<String>> session;
+	Session<String, DefaultSessionResult<String>> session;
 
+	@BeforeMethod
+	public void setupSession() {
+		session = Session.<String, DefaultSessionResult<String>> builder().setNumRuleWorkers(1).setSessionResultCollector(new DefaultSessionResultCollector<String>())
+				.setRuleDefinitions(Rules.define(R1.class, R2.class, R3.class)).build();
+	}
 
-    @BeforeMethod
-    public void setupSession() {
-        session = Session.<String, DefaultSessionResult<String>>builder().setNumRuleWorkers(1).setSessionResultCollector(new DefaultSessionResultCollector<String>())
-                .setRuleDefinitions(Rules.define(R1.class, R2.class, R3.class)).build();
-    }
+	public static class Activate extends SessionTest {
 
-    public static class Activate extends SessionTest {
+		@Test
+		public void shouldActivateFromNew() {
+			session.activate("Input");
+			assertThat(session.getState(), is(Session.State.ACTIVATED));
+		}
 
-        @Test
-        public void shouldActivateFromNew() {
-            session.activate("Input");
-            assertThat(session.getState(), is(Session.State.ACTIVATED));
-        }
+		@Test
+		public void shouldReActivateFromPassivate() {
+			session.activate("Input");
+			assertThat(session.getState(), is(Session.State.ACTIVATED));
+			session.passivate();
+			assertThat(session.getState(), is(Session.State.PASSIVATED));
+			session.activate("String");
+			assertThat(session.getState(), is(Session.State.ACTIVATED));
+		}
 
-        @Test
-        public void shouldReActivateFromPassivate() {
-            session.activate("Input");
-            assertThat(session.getState(), is(Session.State.ACTIVATED));
-            session.passivate();
-            assertThat(session.getState(), is(Session.State.PASSIVATED));
-            session.activate("String");
-            assertThat(session.getState(), is(Session.State.ACTIVATED));
-        }
+		@Test(expectedExceptions = SessionException.class)
+		public void shouldNotActivateBecauseActivated() {
+			session.activate("Input");
+			// should fail because session is already activated
+			session.activate("String");
+		}
 
-        @Test(expectedExceptions = SessionException.class)
-        public void shouldNotActivateBecauseActivated() {
-            session.activate("Input");
-            //should fail because session is already activated
-            session.activate("String");
-        }
+	}
 
-    }
+	@Rule
+	public static class R1 {
 
-    @Rule
-    public static class R1 {
+		@TagValue(type = Tags.ROOT_TAG, injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
+		private String input;
 
-        @TagValue(type = Tags.ROOT_TAG, injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
-        private String input;
+		@Action(resultTag = "Tag1")
+		public String action() {
+			return input + "Enhanced";
+		}
 
-        @Action(resultTag = "Tag1")
-        public String action() {
-            return input + "Enhanced";
-        }
+	}
 
-    }
+	@Rule
+	public static class R2 {
 
-    @Rule
-    public static class R2 {
+		@TagValue(type = "Tag1", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
+		private String input;
 
-        @TagValue(type = "Tag1", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
-        private String input;
+		@Action(resultTag = "Tag2", resultQuantity = Action.Quantity.MULTIPLE)
+		public String[] action() {
+			return new String[] { input + "AgainEnhanced", input + "AgainEnhanced2" };
+		}
 
-        @Action(resultTag = "Tag2", resultQuantity = Action.Quantity.MULTIPLE)
-        public String[] action() {
-            return new String[]{input + "AgainEnhanced", input + "AgainEnhanced2"};
-        }
+	}
 
-    }
+	@Rule(name = "FailingRule")
+	public static class R3 {
 
-    @Rule(name = "FailingRule")
-    public static class R3 {
+		@TagValue(type = "Tag2", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
+		private String input;
 
-        @TagValue(type = "Tag2", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
-        private String input;
+		@Condition(name = "shouldFail", hint = "Also no problem")
+		public boolean fail() {
+			return false;
+		}
 
-        @Condition(name = "shouldFail", hint = "Also no problem")
-        public boolean fail() {
-            return false;
-        }
+		@Condition(name = "shouldAlsoFail", hint = "No problem")
+		public boolean fail2() {
+			return false;
+		}
 
-        @Condition(name = "shouldAlsoFail", hint = "No problem")
-        public boolean fail2() {
-            return false;
-        }
-
-        @Action(resultTag = "Tag3")
-        public String action() {
-            return "Never executed!";
-        }
-    }
+		@Action(resultTag = "Tag3")
+		public String action() {
+			return "Never executed!";
+		}
+	}
 
 }

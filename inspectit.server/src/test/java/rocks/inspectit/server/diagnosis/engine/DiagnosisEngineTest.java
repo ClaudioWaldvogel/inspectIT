@@ -3,8 +3,12 @@
  */
 package rocks.inspectit.server.diagnosis.engine;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Action;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Condition;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Rule;
@@ -15,91 +19,89 @@ import rocks.inspectit.server.diagnosis.engine.session.DefaultSessionResultColle
 import rocks.inspectit.server.diagnosis.engine.session.ISessionCallback;
 import rocks.inspectit.server.diagnosis.engine.tag.Tags;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author Claudio Waldvogel
  */
+@SuppressWarnings("all")
 public class DiagnosisEngineTest {
 
-    @Test
-    public void testEngine() {
+	@Test
+	public void testEngine() {
 
-        final List<DefaultSessionResult<String>> results = new ArrayList<>();
+		final List<DefaultSessionResult<String>> results = new ArrayList<>();
 
-        DiagnosisEngineConfiguration<String, DefaultSessionResult<String>> configuration = new DiagnosisEngineConfiguration<String, DefaultSessionResult<String>>().setNumSessionWorkers(1)
-                .setNumRuleWorkers(1).setRuleClasses(R1.class, R2.class, R3.class).setStorageClass(DefaultRuleOutputStorage.class)
-                .setResultCollector(new DefaultSessionResultCollector<String>()).setSessionCallback(new ISessionCallback<DefaultSessionResult<String>>() {
-                    @Override
-                    public void onSuccess(DefaultSessionResult<String> result) {
-                        results.add(result);
-                    }
+		DiagnosisEngineConfiguration<String, DefaultSessionResult<String>> configuration = new DiagnosisEngineConfiguration<String, DefaultSessionResult<String>>().setNumSessionWorkers(1)
+				.setNumRuleWorkers(1).setRuleClasses(R1.class, R2.class, R3.class).setStorageClass(DefaultRuleOutputStorage.class).setResultCollector(new DefaultSessionResultCollector<String>())
+				.setSessionCallback(new ISessionCallback<DefaultSessionResult<String>>() {
+					@Override
+					public void onSuccess(DefaultSessionResult<String> result) {
+						results.add(result);
+					}
 
-                    @Override
-                    public void onFailure(Throwable t) {
-                    }
+					@Override
+					public void onFailure(Throwable t) {
+					}
 
-                });
+				});
 
-        DiagnosisEngine<String, DefaultSessionResult<String>> diagnosisEngine = new DiagnosisEngine<>(configuration);
+		DiagnosisEngine<String, DefaultSessionResult<String>> diagnosisEngine = new DiagnosisEngine<>(configuration);
 
-        diagnosisEngine.analyze("Trace");
+		diagnosisEngine.analyze("Trace");
 
-        try {
-            diagnosisEngine.shutdown(true);
-            Assert.assertEquals(results.size(), 2);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+		try {
+			diagnosisEngine.shutdown(true);
+			Assert.assertEquals(results.size(), 2);
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
 
-    @Rule
-    public static class R1 {
+	@Rule
+	public static class R1 {
 
-        @TagValue(type = Tags.ROOT_TAG, injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
-        private String input;
+		@TagValue(type = Tags.ROOT_TAG, injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
+		private String input;
 
-        @Action(resultTag = "Tag1")
-        public String action() {
-            return input + "Enhanced";
-        }
+		@Action(resultTag = "Tag1")
+		public String action() {
+			return input + "Enhanced";
+		}
 
-    }
+	}
 
-    @Rule
-    public static class R2 {
+	@Rule
+	public static class R2 {
 
-        @TagValue(type = "Tag1", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
-        private String input;
+		@TagValue(type = "Tag1", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
+		private String input;
 
-        @Action(resultTag = "Tag2", resultQuantity = Action.Quantity.MULTIPLE)
-        public String[] action() {
-            return new String[]{input + "AgainEnhanced", input + "AgainEnhanced2"};
-        }
+		@Action(resultTag = "Tag2", resultQuantity = Action.Quantity.MULTIPLE)
+		public String[] action() {
+			return new String[] { input + "AgainEnhanced", input + "AgainEnhanced2" };
+		}
 
-    }
+	}
 
-    @Rule(name = "FailingRule")
-    public static class R3 {
+	@Rule(name = "FailingRule")
+	public static class R3 {
 
-        @TagValue(type = "Tag2", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
-        private String input;
+		@TagValue(type = "Tag2", injectionStrategy = TagValue.InjectionStrategy.BY_VALUE)
+		private String input;
 
-        @Condition(name = "shouldFail", hint = "Also no problem")
-        public boolean fail() {
-            return false;
-        }
+		@Condition(name = "shouldFail", hint = "Also no problem")
+		public boolean fail() {
+			return false;
+		}
 
-        @Condition(name = "shouldAlsoFail", hint = "No problem")
-        public boolean fail2() {
-            return false;
-        }
+		@Condition(name = "shouldAlsoFail", hint = "No problem")
+		public boolean fail2() {
+			return false;
+		}
 
-        @Action(resultTag = "Tag3")
-        public String action() {
-            return "Never executed!";
-        }
-    }
+		@Action(resultTag = "Tag3")
+		public String action() {
+			return "Never executed!";
+		}
+	}
 
 }

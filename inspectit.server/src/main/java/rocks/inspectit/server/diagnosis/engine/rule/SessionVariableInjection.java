@@ -13,7 +13,8 @@ import java.lang.reflect.Field;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
- * FieldInjection implementation to inject session variables. Each SessionVariableInjection reflects a {@link SessionVariable} annotation.
+ * FieldInjection implementation to inject session variables. Each SessionVariableInjection reflects
+ * a {@link SessionVariable} annotation.
  *
  * @author Claudio Waldvogel
  * @see SessionVariables
@@ -34,11 +35,11 @@ public class SessionVariableInjection extends FieldInjection {
 	 * Default Constructor.
 	 *
 	 * @param name
-	 * 		The name of the variable
+	 *            The name of the variable
 	 * @param optional
-	 * 		Optional flag
+	 *            Optional flag
 	 * @param field
-	 * 		The target field
+	 *            The target field
 	 */
 	public SessionVariableInjection(String name, boolean optional, Field field) {
 		super(field);
@@ -52,12 +53,12 @@ public class SessionVariableInjection extends FieldInjection {
 	 */
 	@Override
 	public Object determineValueToInject(ExecutionContext context) {
-		//Fail fast if value is missing completely and not optional.
+		// Fail fast if value is missing completely and not optional.
 		if (!context.getSessionParameters().containsKey(getVariableName()) && !isOptional()) {
 			throw new RuleExecutionException("Non optional session variable \'" + getVariableName() + "\' not available.", context);
 		}
-		//This might return null if a null value is available for a certain key.
-		//Needs to be discussed how to handle this.
+		// This might return null if a null value is available for a certain key.
+		// Needs to be discussed how to handle this.
 		return context.getSessionParameters().get(getVariableName());
 	}
 

@@ -1,13 +1,14 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
-import com.google.common.collect.ImmutableSet;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableSet;
 
 /**
- * Defines the condition, if a rule can be executed or not. The <code>FireCondition</code> basically checks if a predefined set of tag types is already available in the engine.
+ * Defines the condition, if a rule can be executed or not. The <code>FireCondition</code> basically
+ * checks if a predefined set of tag types is already available in the engine.
  *
  * @author Claudio Waldvogel
  */
@@ -19,10 +20,10 @@ public class FireCondition {
 	private final Set<String> tagTypes;
 
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 *
 	 * @param tagTypes
-	 * 		The types this <code>FireCondition</code> requires.
+	 *            The types this <code>FireCondition</code> requires.
 	 */
 	public FireCondition(Set<String> tagTypes) {
 		this.tagTypes = ImmutableSet.copyOf(tagTypes);
@@ -32,7 +33,7 @@ public class FireCondition {
 	 * Checks if all required {@link #tagTypes} are satisfied by a provided set of tag types.
 	 *
 	 * @param offer
-	 * 		The set of tag types to be checked.
+	 *            The set of tag types to be checked.
 	 * @return true if a rule can be executed, false otherwise.
 	 */
 	public boolean canFire(Set<String> offer) {

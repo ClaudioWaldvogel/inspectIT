@@ -7,22 +7,30 @@ package rocks.inspectit.server.diagnosis.engine;
  */
 public class DiagnosisEngineException extends RuntimeException {
 
-    /**
-     * Default constructor to create a new exception.
-     *
-     * @param message The error message.
-     */
-    public DiagnosisEngineException(String message) {
-        super(message);
-    }
+	/**
+	 * The serial version ID.
+	 */
+	private static final long serialVersionUID = -5280019890160625754L;
 
-    /**
-     * Constructor to create a new exception with embedded root cause.
-     *
-     * @param message The error message.
-     * @param cause   The root cause
-     */
-    public DiagnosisEngineException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/**
+	 * Default constructor to create a new exception.
+	 *
+	 * @param message
+	 *            The error message.
+	 */
+	public DiagnosisEngineException(String message) {
+		super(message);
+	}
+
+	/**
+	 * Constructor to create a new exception with embedded root cause.
+	 *
+	 * @param message
+	 *            The error message.
+	 * @param cause
+	 *            The root cause
+	 */
+	public DiagnosisEngineException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

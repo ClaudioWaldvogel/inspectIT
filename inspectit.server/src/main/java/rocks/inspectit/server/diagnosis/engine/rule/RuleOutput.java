@@ -1,12 +1,13 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
-import com.google.common.base.Strings;
-import rocks.inspectit.server.diagnosis.engine.tag.Tag;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Strings;
+
+import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 
 /**
  * Represents the result of a single execution of a <code>RuleDefinition</code>.
@@ -22,7 +23,8 @@ public class RuleOutput {
 	private final String ruleName;
 
 	/**
-	 * The type of the <code>Tags</code> which were produced by this rule. Field is never empty nor null.
+	 * The type of the <code>Tags</code> which were produced by this rule. Field is never empty nor
+	 * null.
 	 */
 	private final String embeddedTagType;
 
@@ -37,16 +39,16 @@ public class RuleOutput {
 	private final Collection<Tag> tags;
 
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 *
 	 * @param ruleName
-	 * 		The name of the executed rule.
+	 *            The name of the executed rule.
 	 * @param embeddedTagType
-	 * 		The type of the produced <code>Tag</code>s.
+	 *            The type of the produced <code>Tag</code>s.
 	 * @param conditionFailures
-	 * 		The collected <code>ConditionFailure</code>s.
+	 *            The collected <code>ConditionFailure</code>s.
 	 * @param tags
-	 * 		The collected <code>Tag</code>s.
+	 *            The collected <code>Tag</code>s.
 	 */
 	public RuleOutput(String ruleName, String embeddedTagType, Collection<ConditionFailure> conditionFailures, Collection<Tag> tags) {
 		checkArgument(!Strings.isNullOrEmpty(ruleName), "Rule name must not be empty!");

@@ -1,11 +1,11 @@
 package rocks.inspectit.server.diagnosis.engine.tag;
 
-import com.google.common.collect.Sets;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
+
+import com.google.common.collect.Sets;
 
 /**
  * Utility class to work with <code>Tag</code>s.
@@ -14,15 +14,16 @@ import java.util.Set;
  * @see Tag
  */
 
-public class Tags {
+public final class Tags {
 
 	/**
-	 * The name of the initial Tag. At least one rule implementation has to use this Tag. If not, no rule will ever fire.
+	 * The name of the initial Tag. At least one rule implementation has to use this Tag. If not, no
+	 * rule will ever fire.
 	 */
 	public static final String ROOT_TAG = "Root";
 
 	/**
-	 * Must not be instantiated
+	 * Must not be instantiated.
 	 */
 	private Tags() {
 		throw new UnsupportedOperationException("Must not be instantiated");
@@ -32,7 +33,7 @@ public class Tags {
 	 * Factory method to create the root <code>Tag</code> of type {@link #ROOT_TAG}.
 	 *
 	 * @param input
-	 * 		The input object to be analyzed.
+	 *            The input object to be analyzed.
 	 * @return A new Tag
 	 */
 	public static Tag rootTag(Object input) {
@@ -43,9 +44,9 @@ public class Tags {
 	 * Factory method to create a new Tag.
 	 *
 	 * @param type
-	 * 		The type of the <code>Tag</code>.
+	 *            The type of the <code>Tag</code>.
 	 * @param input
-	 * 		The input object to be analyzed.
+	 *            The input object to be analyzed.
 	 * @return A new Tag
 	 */
 	public static Tag tag(String type, Object input) {
@@ -56,11 +57,11 @@ public class Tags {
 	 * Factory method to create a new Tag.
 	 *
 	 * @param type
-	 * 		The type of the <code>Tag</code>.
+	 *            The type of the <code>Tag</code>.
 	 * @param input
-	 * 		The input object to be analyzed.
+	 *            The input object to be analyzed.
 	 * @param parent
-	 * 		The parent <code>Tag</code>.
+	 *            The parent <code>Tag</code>.
 	 * @return A new Tag
 	 */
 	public static Tag tag(String type, Object input, Tag parent) {
@@ -71,11 +72,12 @@ public class Tags {
 	 * Factory method to create a collection of <code>Tag</code>s.
 	 *
 	 * @param type
-	 * 		The type of all <code>Tag</code>s.
+	 *            The type of all <code>Tag</code>s.
 	 * @param parent
-	 * 		The parent <code>Tag</code>.
+	 *            The parent <code>Tag</code>.
 	 * @param values
-	 * 		The values to be wrapped in <code>Tag</code>. For each value a new <code>Tag</code> is created.
+	 *            The values to be wrapped in <code>Tag</code>. For each value a new
+	 *            <code>Tag</code> is created.
 	 * @return A collection of Tags.
 	 */
 	public static Collection<Tag> tags(String type, Tag parent, Object... values) {
@@ -86,11 +88,12 @@ public class Tags {
 	 * Factory method to create a collection of <code>Tag</code>s.
 	 *
 	 * @param type
-	 * 		The type of all <code>Tag</code>s.
+	 *            The type of all <code>Tag</code>s.
 	 * @param parent
-	 * 		The parent <code>Tag</code>.
+	 *            The parent <code>Tag</code>.
 	 * @param values
-	 * 		The values to be wrapped in <code>Tag</code>. For each value a new <code>Tag</code> is created.
+	 *            The values to be wrapped in <code>Tag</code>. For each value a new
+	 *            <code>Tag</code> is created.
 	 * @return A collection of Tags.
 	 */
 	public static Collection<Tag> tags(String type, Tag parent, Collection<Object> values) {
@@ -102,21 +105,24 @@ public class Tags {
 	}
 
 	/**
-	 * Unwraps all requested parents from a <code>Tag</code>. Since a <code>Tag</code>s carries it's predecessor it is possible to extract any subset of all parents from the inheritance hierarhcy.
+	 * Unwraps all requested parents from a <code>Tag</code>. Since a <code>Tag</code>s carries it's
+	 * predecessor it is possible to extract any subset of all parents from the inheritance
+	 * hierarhcy.
 	 *
 	 * @param tag
-	 * 		The <code>Tag</code> to be unwrapped
+	 *            The <code>Tag</code> to be unwrapped
 	 * @param parentTypes
-	 * 		The requested  parentsTypes
+	 *            The requested parentsTypes
 	 * @return A collection of <code>Tag</code>.
-	 * <p>
-	 * <pre>
+	 *         <p>
+	 *
+	 *         <pre>
 	 *    The collection contains:
 	 *    <ul>
 	 *        <li>The <code>tag</code> itself.</li>
 	 *        <li>All <code>Tag</code>s of <code>parentsTypes</code>, which are available in the inheritance hierarchy of the <code>tag</code></li>
 	 *    </ul>
-	 * </pre>
+	 *         </pre>
 	 */
 	public static Collection<Tag> unwrap(Tag tag, Collection<String> parentTypes) {
 		// Insert Leaf itself to all tags list

@@ -1,9 +1,9 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
-import com.google.common.base.Objects;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
+
+import com.google.common.base.Objects;
 
 /**
  * Provides information about a failed condition.
@@ -23,12 +23,12 @@ public class ConditionFailure {
 	private final String hint;
 
 	/**
-	 * Default Constructor
+	 * Default Constructor.
 	 *
 	 * @param conditionName
-	 * 		The name of the failed condition
+	 *            The name of the failed condition
 	 * @param hint
-	 * 		A hint why the condition failed
+	 *            A hint why the condition failed
 	 */
 	public ConditionFailure(String conditionName, String hint) {
 		checkArgument(!isNullOrEmpty(conditionName), "The condition name must not be null!");

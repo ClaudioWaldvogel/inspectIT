@@ -3,18 +3,19 @@
  */
 package rocks.inspectit.server.diagnosis.engine.rule;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
+
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Action;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.Rule;
 import rocks.inspectit.server.diagnosis.engine.rule.annotation.TagValue;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
-
 /**
  * @author Claudio Waldvogel
  */
+@SuppressWarnings("all")
 @Rule(name = "RuleDummy", description = "Test", fireCondition = { "T1,T2" })
 public class RuleDummy {
 

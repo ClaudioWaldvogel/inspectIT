@@ -22,8 +22,10 @@ public class RuleInput {
 	private final Tag root;
 
 	/**
-	 * A collection of <code>Tag</code>s which were extracted from the {@link #root} <code>Tag</code>. The exact content of the unraveled collection depends on which <code>Tags</code> the actual rule
-	 * implementation needs to execute.. The {@link #root} Tag itself is present in the unraveled collection as well.
+	 * A collection of <code>Tag</code>s which were extracted from the {@link #root}
+	 * <code>Tag</code>. The exact content of the unraveled collection depends on which
+	 * <code>Tags</code> the actual rule implementation needs to execute.. The {@link #root} Tag
+	 * itself is present in the unraveled collection as well.
 	 *
 	 * @see FireCondition
 	 * @see TagInjection
@@ -34,7 +36,7 @@ public class RuleInput {
 	 * Default Constructor.
 	 *
 	 * @param root
-	 * 		The root <code>Tag</code>.
+	 *            The root <code>Tag</code>.
 	 */
 	public RuleInput(Tag root) {
 		this(root, Collections.singleton(root));
@@ -44,9 +46,9 @@ public class RuleInput {
 	 * Constructor with unraveled collection.
 	 *
 	 * @param root
-	 * 		The root <code>Tag</code>.
+	 *            The root <code>Tag</code>.
 	 * @param unraveled
-	 * 		The unraveled collection of Tags. ({@link #unraveled}).
+	 *            The unraveled collection of Tags. ({@link #unraveled}).
 	 * @see Tag
 	 */
 	public RuleInput(Tag root, Collection<Tag> unraveled) {

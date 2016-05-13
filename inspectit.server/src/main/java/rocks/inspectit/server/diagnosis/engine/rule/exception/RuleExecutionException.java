@@ -3,19 +3,24 @@ package rocks.inspectit.server.diagnosis.engine.rule.exception;
 import rocks.inspectit.server.diagnosis.engine.rule.ExecutionContext;
 
 /**
- * Exception is raised if the execution of a rule fails
+ * Exception is raised if the execution of a rule fails.
  *
  * @author Claudio Waldvogel
  */
 public class RuleExecutionException extends RuntimeException {
 
 	/**
-	 * Default constructor
+	 * The serial version UID.
+	 */
+	private static final long serialVersionUID = 5382006828445473398L;
+
+	/**
+	 * Default constructor.
 	 *
 	 * @param message
-	 * 		The error message
+	 *            The error message
 	 * @param context
-	 * 		A reference to the failed {@link ExecutionContext}
+	 *            A reference to the failed {@link ExecutionContext}
 	 * @see ExecutionContext
 	 */
 	public RuleExecutionException(String message, ExecutionContext context) {
@@ -26,11 +31,11 @@ public class RuleExecutionException extends RuntimeException {
 	 * Constructor that allows definition of the technical root cause.
 	 *
 	 * @param message
-	 * 		The error message
+	 *            The error message
 	 * @param context
-	 * 		A reference to the failed {@link ExecutionContext}
+	 *            A reference to the failed {@link ExecutionContext}
 	 * @param cause
-	 * 		The technical root cause
+	 *            The technical root cause
 	 * @see ExecutionContext
 	 */
 	public RuleExecutionException(String message, ExecutionContext context, Throwable cause) {
@@ -38,12 +43,12 @@ public class RuleExecutionException extends RuntimeException {
 	}
 
 	/**
-	 * Utility method to enrich the error message with
+	 * Utility method to enrich the error message with.
 	 *
 	 * @param message
-	 * 		The error message
+	 *            The error message
 	 * @param context
-	 * 		The failed execution context
+	 *            The failed execution context
 	 * @return Enriched error message
 	 */
 	private static String prefix(String message, ExecutionContext context) {

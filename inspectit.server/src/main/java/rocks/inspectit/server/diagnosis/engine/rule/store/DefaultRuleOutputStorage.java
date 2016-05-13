@@ -1,16 +1,21 @@
 package rocks.inspectit.server.diagnosis.engine.rule.store;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+
 import rocks.inspectit.server.diagnosis.engine.rule.RuleOutput;
 import rocks.inspectit.server.diagnosis.engine.tag.Tag;
 import rocks.inspectit.server.diagnosis.engine.tag.TagState;
 
-import java.util.*;
-
 /**
- * The default implementation of {@link IRuleOutputStorage}
+ * The default implementation of {@link IRuleOutputStorage}.
  *
  * @author Claudio Waldvogel
  */
@@ -22,13 +27,14 @@ public class DefaultRuleOutputStorage implements IRuleOutputStorage {
 	private final Multimap<String, RuleOutput> allOutputs = LinkedHashMultimap.create();
 
 	/**
-	 * The backing Multimap to store all <code>RuleOutput</code>s where one or more condition failed.
+	 * The backing Multimap to store all <code>RuleOutput</code>s where one or more condition
+	 * failed.
 	 */
 	private final Multimap<String, RuleOutput> conditionFailures = ArrayListMultimap.create();
 
-	//-------------------------------------------------------------
+	// -------------------------------------------------------------
 	// Interface Implementation: IRuleOutputStorage
-	//-------------------------------------------------------------
+	// -------------------------------------------------------------
 
 	@Override
 	public void store(Collection<RuleOutput> output) {
@@ -77,7 +83,7 @@ public class DefaultRuleOutputStorage implements IRuleOutputStorage {
 	}
 
 	@Override
-	public Collection<RuleOutput> findLeafsByTags(Set<String> tagTypes) {
+	public Collection<RuleOutput> findLatestResultsByTagType(Set<String> tagTypes) {
 		Set<String> keys = allOutputs.keySet();
 		ListIterator<String> iterator = new ArrayList<>(keys).listIterator(keys.size());
 		while (iterator.hasPrevious()) {

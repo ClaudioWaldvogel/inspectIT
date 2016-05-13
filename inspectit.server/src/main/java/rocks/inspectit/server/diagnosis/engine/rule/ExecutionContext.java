@@ -1,11 +1,13 @@
 package rocks.inspectit.server.diagnosis.engine.rule;
 
-import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import rocks.inspectit.server.diagnosis.engine.session.SessionVariables;
+
 /**
- * Value object providing information to execute a rule implementation. A instance of <code>ExecutionContext</code> is valid for exactly one execution of a rule implementation.
+ * Value object providing information to execute a rule implementation. A instance of
+ * <code>ExecutionContext</code> is valid for exactly one execution of a rule implementation.
+ *
  * <pre>
  *     This encloses:
  * <ul>
@@ -15,6 +17,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *     <li>The <code>ActionMethod</code></li>
  * </ul>
  * </pre>
+ *
  * After the rule is executed the ExecutionContext is invalid and destroyed.
  *
  * @author Claudio Waldvogel
@@ -24,21 +27,22 @@ public class ExecutionContext {
 	/**
 	 * The backing rule implementation.
 	 */
-	private Object instance;
+	private final Object instance;
 
 	/**
-	 * The <code>RuleDefinition</code> to be executed. The <code>RuleDefinition</code> is a abstracted and generalized of a rule implementation {@link #instance)}.
+	 * The <code>RuleDefinition</code> to be executed. The <code>RuleDefinition</code> is a
+	 * abstracted and generalized of a rule implementation {@link #instance)}.
 	 *
 	 * @see RuleDefinition
 	 */
-	private RuleDefinition definition;
+	private final RuleDefinition definition;
 
 	/**
 	 * The input to be processed by the rule.
 	 *
 	 * @see RuleInput
 	 */
-	private RuleInput input;
+	private final RuleInput input;
 
 	/**
 	 * TODO Check if SessionVariables should be nested in RuleInput
@@ -47,33 +51,33 @@ public class ExecutionContext {
 	 *
 	 * @see SessionVariables
 	 */
-	private SessionVariables sessionParameters;
+	private final SessionVariables sessionParameters;
 
 	/**
-	 * Default Constructor
+	 * Default Constructor.
 	 *
 	 * @param definition
-	 * 		The <code>RuleDefinition</code>
+	 *            The <code>RuleDefinition</code>
 	 * @param instance
-	 * 		The <code>actual implementation</code>
+	 *            The <code>actual implementation</code>
 	 * @param input
-	 * 		The <code>RuleInput</code> to be processed
+	 *            The <code>RuleInput</code> to be processed
 	 */
 	public ExecutionContext(RuleDefinition definition, Object instance, RuleInput input) {
 		this(definition, instance, input, new SessionVariables());
 	}
 
 	/**
-	 * Constructor with <code>SessionVariables</code>
+	 * Constructor with {@link SessionVariables}.
 	 *
 	 * @param definition
-	 * 		The <code>RuleDefinition</code>
+	 *            The <code>RuleDefinition</code>
 	 * @param instance
-	 * 		The <code>actual implementation</code>
+	 *            The <code>actual implementation</code>
 	 * @param input
-	 * 		The <code>RuleInput</code> to be processed
+	 *            The <code>RuleInput</code> to be processed
 	 * @param sessionParameters
-	 * 		The <code>SessionVariables</code>
+	 *            The <code>SessionVariables</code>
 	 */
 	public ExecutionContext(RuleDefinition definition, Object instance, RuleInput input, SessionVariables sessionParameters) {
 		this.definition = checkNotNull(definition);

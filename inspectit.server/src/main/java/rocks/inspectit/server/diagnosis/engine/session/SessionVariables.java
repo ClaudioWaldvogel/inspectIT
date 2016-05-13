@@ -10,8 +10,8 @@ import java.util.HashMap;
 public class SessionVariables extends HashMap<String, Object> {
 
 	/**
-	 * Default Constructor
+	 * The serial version UID.
 	 */
-	public SessionVariables() {
-	}
+	private static final long serialVersionUID = 4674382247068252913L;
+
 }

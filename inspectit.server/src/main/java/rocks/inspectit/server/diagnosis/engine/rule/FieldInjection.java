@@ -3,14 +3,15 @@
  */
 package rocks.inspectit.server.diagnosis.engine.rule;
 
-import org.apache.commons.lang.builder.EqualsBuilder;
-import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleExecutionException;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.reflect.Field;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
+import org.apache.commons.lang.builder.ToStringBuilder;
+
+import rocks.inspectit.server.diagnosis.engine.rule.exception.RuleExecutionException;
 
 /**
  * Base class for classes which need to inject a value to a field.
@@ -25,10 +26,10 @@ public abstract class FieldInjection {
 	private final Field injectee;
 
 	/**
-	 * Default constructor
+	 * Default constructor.
 	 *
 	 * @param injectee
-	 * 		The target field
+	 *            The target field
 	 */
 	public FieldInjection(Field injectee) {
 		this.injectee = checkNotNull(injectee, "The injectee must not be null.");
@@ -40,9 +41,9 @@ public abstract class FieldInjection {
 	 * Performs the injection.
 	 *
 	 * @param context
-	 * 		The current valid <code>ExecutionContext</code>
+	 *            The current valid <code>ExecutionContext</code>
 	 * @throws RuleExecutionException
-	 * 		if the injection fails
+	 *             if the injection fails
 	 * @see ExecutionContext
 	 */
 	public void execute(ExecutionContext context) {
@@ -58,14 +59,14 @@ public abstract class FieldInjection {
 	 * Method determines the value to be injected to {@link #injectee}.
 	 *
 	 * @param context
-	 * 		The <code>ExecutionContext</code>
+	 *            The <code>ExecutionContext</code>
 	 * @return Any object, or null, to be injected to {@link #injectee}
 	 */
 	protected abstract Object determineValueToInject(ExecutionContext context);
 
-	//-------------------------------------------------------------
+	// -------------------------------------------------------------
 	// Methods: Accessors
-	//-------------------------------------------------------------
+	// -------------------------------------------------------------
 
 	/**
 	 * Gets {@link #injectee}.
@@ -76,9 +77,9 @@ public abstract class FieldInjection {
 		return injectee;
 	}
 
-	//-------------------------------------------------------------
+	// -------------------------------------------------------------
 	// Methods: Generated
-	//-------------------------------------------------------------
+	// -------------------------------------------------------------
 
 	/**
 	 * {@inheritDoc}
@@ -90,11 +91,13 @@ public abstract class FieldInjection {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
+		if (this == o) {
 			return true;
+		}
 
-		if (o == null || getClass() != o.getClass())
+		if (o == null || getClass() != o.getClass()) {
 			return false;
+		}
 
 		FieldInjection that = (FieldInjection) o;
 

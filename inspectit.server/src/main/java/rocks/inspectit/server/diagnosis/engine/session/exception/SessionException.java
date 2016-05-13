@@ -7,22 +7,30 @@ package rocks.inspectit.server.diagnosis.engine.session.exception;
  */
 public class SessionException extends RuntimeException {
 
-    /**
-     * Default Constructor
-     *
-     * @param message The error message
-     */
-    public SessionException(String message) {
-        super(message);
-    }
+	/**
+	 * The serial version UID.
+	 */
+	private static final long serialVersionUID = -7588955901539457468L;
 
-    /**
-     * Constructor with cause
-     *
-     * @param message The error message
-     * @param cause   The cause of the error
-     */
-    public SessionException(String message, Throwable cause) {
-        super(message, cause);
-    }
+	/**
+	 * Default Constructor.
+	 *
+	 * @param message
+	 *            The error message
+	 */
+	public SessionException(String message) {
+		super(message);
+	}
+
+	/**
+	 * Constructor with cause.
+	 *
+	 * @param message
+	 *            The error message
+	 * @param cause
+	 *            The cause of the error
+	 */
+	public SessionException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }
